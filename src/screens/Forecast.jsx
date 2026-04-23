@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   CartesianGrid,
   Legend,
@@ -9,8 +10,12 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import AnalysisOverlay from "../components/AnalysisOverlay";
+import NextStepBar from "../components/NextStepBar";
 import ForecastScenarioCard from "../components/ForecastScenarioCard";
 import { getUserFinancialContext } from "../lib/getUserFinancialContext";
+
+const analysisState = { completed: false };
 
 const formatCurrency = (amount) =>
   new Intl.NumberFormat("en-MY", {
@@ -163,6 +168,17 @@ const projectFinancialForecast = (data, metrics) => {
 };
 
 function Forecast({ setScreen }) {
+  const forecastAnalysisLines = [
+    "Loading historical snapshots...",
+    "Projecting income vs obligations...",
+    "Modelling BNPL compounding effect...",
+    "Simulating 3-month trajectory...",
+    "Identifying critical threshold...",
+    "Forecast ready.",
+  ];
+  const [hasAnalysed, setHasAnalysed] = useState(analysisState.completed);
+  const [contentVisible, setContentVisible] = useState(analysisState.completed);
+  const [hasStartedAnalysis, setHasStartedAnalysis] = useState(analysisState.completed);
   const { data, metrics, scoreResult } = getUserFinancialContext();
   const forecast = projectFinancialForecast(data, metrics);
   const current60Day = forecast.currentBehavior.find((item) => item.days === 60);
@@ -189,8 +205,30 @@ function Forecast({ setScreen }) {
   };
 
   return (
-    <div className="min-h-[calc(100vh-84px)] bg-[#FCFCFD] px-8 py-7">
-      <div className="mx-auto max-w-[1180px] space-y-6">
+    <div className="min-h-[calc(100vh-84px)] bg-[#FCFCFD] px-8 py-7 pb-24">
+      {!hasAnalysed && hasStartedAnalysis ? (
+        <div className="flex min-h-[60vh] items-center justify-center px-8">
+          <AnalysisOverlay
+            inline
+            containerClassName="w-full"
+            cardClassName="max-w-2xl w-full mx-auto"
+            lines={forecastAnalysisLines}
+            onComplete={() => {
+              analysisState.completed = true;
+              setHasAnalysed(true);
+              window.requestAnimationFrame(() => {
+                setContentVisible(true);
+              });
+            }}
+          />
+        </div>
+      ) : null}
+      {hasAnalysed ? (
+      <div
+        className={`mx-auto max-w-[1180px] space-y-6 transition-opacity duration-[400ms] ${
+          contentVisible ? "opacity-100" : "opacity-0"
+        }`}
+      >
         <section className="rounded-[28px] border border-[#E6E8EC] bg-white p-8">
           <div className="flex items-center justify-between gap-6">
             <div>
@@ -396,6 +434,37 @@ function Forecast({ setScreen }) {
           </div>
         </section>
       </div>
+      ) : !hasStartedAnalysis ? (
+        <div className="mx-auto flex min-h-[calc(100vh-140px)] max-w-[560px] items-center justify-center">
+          <div className="w-full rounded-[20px] border border-[#E6E8EC] bg-white p-8 shadow-sm">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">
+              MyDuitAI Analysis Engine
+            </p>
+            <h2 className="mt-3 text-[28px] font-semibold tracking-[-0.03em] text-[#111827]">
+              Forecast
+            </h2>
+            <p className="mt-3 text-[14px] leading-relaxed text-[#6B7280]">
+              The AI will simulate your financial trajectory over the next 3 months.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setHasStartedAnalysis(true);
+                setContentVisible(false);
+              }}
+              className="mt-6 rounded-full bg-[#1652F0] px-6 py-3 text-[14px] font-semibold text-white transition hover:bg-[#1446CC]"
+            >
+              Generate Forecast
+            </button>
+          </div>
+        </div>
+      ) : null}
+      <NextStepBar
+        show={hasAnalysed && contentVisible}
+        label="Your financial trajectory is critical. The AI has triggered an intervention."
+        buttonText="See the Intervention →"
+        onClick={() => setScreen("checkout")}
+      />
     </div>
   );
 }

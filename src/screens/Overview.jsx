@@ -9,10 +9,14 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import AnalysisOverlay from "../components/AnalysisOverlay";
+import NextStepBar from "../components/NextStepBar";
 import RiskDriverList from "../components/RiskDriverList";
 import RiskSummaryCard from "../components/RiskSummaryCard";
 import { generateRiskExplanation } from "../lib/generateRiskExplanation";
 import { getUserFinancialContext } from "../lib/getUserFinancialContext";
+
+const analysisState = { completed: false };
 
 function CustomScoreTooltip({ active, payload, label }) {
   if (!active || !payload?.length) {
@@ -35,6 +39,15 @@ function CustomScoreTooltip({ active, payload, label }) {
 }
 
 function Overview({ setScreen }) {
+  const overviewAnalysisLines = [
+    "Connecting to financial data...",
+    "Reading 27 transactions across 3 months...",
+    "Detecting BNPL activity...",
+    "Analysing spending-to-income ratio...",
+    "Evaluating repayment punctuality...",
+    "Calculating Financial Stress Score...",
+    "Analysis complete.",
+  ];
   const scoreTrendData = [
     { label: "Early Mar", score: 79, zone: "Warning" },
     { label: "Mid Mar", score: 72, zone: "Warning" },
@@ -60,8 +73,29 @@ function Overview({ setScreen }) {
   const monitoredTransactions = data.transactions?.length ?? 0;
   const [showAlert, setShowAlert] = useState(false);
   const [displayedText, setDisplayedText] = useState("");
+  const [hasAnalysed, setHasAnalysed] = useState(analysisState.completed);
+  const [contentVisible, setContentVisible] = useState(analysisState.completed);
+  const [showAnalysisOverlay, setShowAnalysisOverlay] = useState(!analysisState.completed);
   const alertCardRef = useRef(null);
   const aiAlertMessage = `AI warning: your score is sliding fast, Buy Now Pay Later load is now ${metrics.bnplRatioPercent}% of income, and April cash is down to ${formatCurrency(metrics.latestEndingBalance)}.`;
+
+  useEffect(() => {
+    if (analysisState.completed) {
+      return undefined;
+    }
+
+    setHasAnalysed(false);
+    setContentVisible(false);
+    setShowAnalysisOverlay(false);
+
+    const startTimer = window.setTimeout(() => {
+      setShowAnalysisOverlay(true);
+    }, 300);
+
+    return () => {
+      window.clearTimeout(startTimer);
+    };
+  }, []);
 
   useEffect(() => {
     const alertNode = alertCardRef.current;
@@ -113,7 +147,25 @@ function Overview({ setScreen }) {
   const isTyping = showAlert && displayedText.length < aiAlertMessage.length;
 
   return (
-    <div className="min-h-[calc(100vh-84px)] bg-[#FCFCFD] px-8 py-7">
+    <div className="min-h-[calc(100vh-84px)] bg-[#FCFCFD] px-8 py-7 pb-24">
+      {showAnalysisOverlay ? (
+        <div className="flex min-h-[60vh] items-center justify-center px-8">
+          <AnalysisOverlay
+            inline
+            containerClassName="w-full"
+            cardClassName="max-w-2xl w-full mx-auto"
+            lines={overviewAnalysisLines}
+            onComplete={() => {
+              analysisState.completed = true;
+              setShowAnalysisOverlay(false);
+              setHasAnalysed(true);
+              window.requestAnimationFrame(() => {
+                setContentVisible(true);
+              });
+            }}
+          />
+        </div>
+      ) : null}
       <style>
         {`
           @keyframes blink {
@@ -137,7 +189,12 @@ function Overview({ setScreen }) {
           }
         `}
       </style>
-      <div className="mx-auto max-w-[1180px] space-y-5">
+      {hasAnalysed ? (
+      <div
+        className={`mx-auto max-w-[1180px] space-y-5 transition-opacity duration-[400ms] ${
+          contentVisible ? "opacity-100" : "opacity-0"
+        }`}
+      >
         <section className="rounded-[28px] border border-[#E6E8EC] bg-white p-8">
           <div className="grid grid-cols-[minmax(0,1fr)_360px] items-center gap-8">
             <div className="max-w-[620px]">
@@ -607,6 +664,13 @@ function Overview({ setScreen }) {
           </div>
         </section>
       </div>
+      ) : null}
+      <NextStepBar
+        show={hasAnalysed && contentVisible}
+        label="The AI has calculated your Financial Stress Score. See what signals are driving it."
+        buttonText="See What We See →"
+        onClick={() => setScreen("signals")}
+      />
     </div>
   );
 }

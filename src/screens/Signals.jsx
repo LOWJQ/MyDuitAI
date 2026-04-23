@@ -9,9 +9,13 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import AnalysisOverlay from "../components/AnalysisOverlay";
+import NextStepBar from "../components/NextStepBar";
 import TransactionTable from "../components/TransactionTable";
 import { generateRiskExplanation } from "../lib/generateRiskExplanation";
 import { getUserFinancialContext } from "../lib/getUserFinancialContext";
+
+const analysisState = { completed: false };
 
 function BnplTooltip({ active, payload, label }) {
   if (!active || !payload?.length) {
@@ -27,7 +31,18 @@ function BnplTooltip({ active, payload, label }) {
 }
 
 function Signals({ setScreen }) {
+  const signalAnalysisLines = [
+    "Scanning behavioural patterns...",
+    "Flagging BNPL frequency signals...",
+    "Checking ending balance trend...",
+    "Reviewing repayment history...",
+    "Mapping risk contributors...",
+    "Signals identified.",
+  ];
   const [activeFilter, setActiveFilter] = useState("All");
+  const [hasAnalysed, setHasAnalysed] = useState(analysisState.completed);
+  const [contentVisible, setContentVisible] = useState(analysisState.completed);
+  const [hasStartedAnalysis, setHasStartedAnalysis] = useState(analysisState.completed);
   const {
     data,
     metrics,
@@ -127,8 +142,30 @@ function Signals({ setScreen }) {
   ];
 
   return (
-    <div className="min-h-[calc(100vh-84px)] bg-[#FCFCFD] px-8 py-7">
-      <div className="mx-auto max-w-[1180px] space-y-6">
+    <div className="min-h-[calc(100vh-84px)] bg-[#FCFCFD] px-8 py-7 pb-24">
+      {!hasAnalysed && hasStartedAnalysis ? (
+        <div className="flex min-h-[60vh] items-center justify-center px-8">
+          <AnalysisOverlay
+            inline
+            containerClassName="w-full"
+            cardClassName="max-w-2xl w-full mx-auto"
+            lines={signalAnalysisLines}
+            onComplete={() => {
+              analysisState.completed = true;
+              setHasAnalysed(true);
+              window.requestAnimationFrame(() => {
+                setContentVisible(true);
+              });
+            }}
+          />
+        </div>
+      ) : null}
+      {hasAnalysed ? (
+      <div
+        className={`mx-auto max-w-[1180px] space-y-6 transition-opacity duration-[400ms] ${
+          contentVisible ? "opacity-100" : "opacity-0"
+        }`}
+      >
         <section className="rounded-[28px] border border-[#E6E8EC] bg-white p-8">
           <div className="flex items-center justify-between gap-6">
             <div>
@@ -740,6 +777,37 @@ function Signals({ setScreen }) {
           </div>
         </section>
       </div>
+      ) : !hasStartedAnalysis ? (
+        <div className="mx-auto flex min-h-[calc(100vh-140px)] max-w-[560px] items-center justify-center">
+          <div className="w-full rounded-[20px] border border-[#E6E8EC] bg-white p-8 shadow-sm">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6B7280]">
+              MyDuitAI Analysis Engine
+            </p>
+            <h2 className="mt-3 text-[28px] font-semibold tracking-[-0.03em] text-[#111827]">
+              What We See
+            </h2>
+            <p className="mt-3 text-[14px] leading-relaxed text-[#6B7280]">
+              The AI will scan your transaction behaviour and map risk contributors.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setHasStartedAnalysis(true);
+                setContentVisible(false);
+              }}
+              className="mt-6 rounded-full bg-[#1652F0] px-6 py-3 text-[14px] font-semibold text-white transition hover:bg-[#1446CC]"
+            >
+              Run Signal Analysis
+            </button>
+          </div>
+        </div>
+      ) : null}
+      <NextStepBar
+        show={hasAnalysed && contentVisible}
+        label="4 risk signals identified across your transaction history. See where this leads."
+        buttonText="See Where This Leads →"
+        onClick={() => setScreen("forecast")}
+      />
     </div>
   );
 }

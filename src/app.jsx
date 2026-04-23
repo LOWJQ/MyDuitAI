@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Checkout from "./screens/Checkout";
 import Forecast from "./screens/Forecast";
 import Overview from "./screens/Overview";
+import Recovery from "./screens/Recovery";
 import Signals from "./screens/Signals";
 import { getUserFinancialContext } from "./lib/getUserFinancialContext";
 
@@ -10,12 +11,14 @@ const sidebarItems = [
   { label: "Signals", screen: "signals", icon: "receipt" },
   { label: "Forecast", screen: "forecast", icon: "clock" },
   { label: "Checkout", screen: "checkout", icon: "compass" },
+  { label: "Recovery", screen: "recovery", icon: "shield" },
 ];
 const demoSteps = [
   { label: "Your Risk", screen: "overview" },
   { label: "What We See", screen: "signals" },
   { label: "Where This Leads", screen: "forecast" },
   { label: "Decision Moment", screen: "checkout" },
+  { label: "Recovery Plan", screen: "recovery" },
 ];
 
 function SidebarIcon({ icon, active = false }) {
@@ -48,6 +51,19 @@ function SidebarIcon({ icon, active = false }) {
           strokeLinejoin="round"
         />
         <path d="M9 9H15M9 13H15" stroke={stroke} strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
+  if (icon === "shield") {
+    return (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path
+          d="M12 3L4 7V12C4 16.4 7.4 20.5 12 21C16.6 20.5 20 16.4 20 12V7L12 3Z"
+          stroke={stroke}
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
       </svg>
     );
   }
@@ -108,6 +124,11 @@ function App() {
       subtitle: "Intervene at the moment of decision with friction by default.",
       layer: "Intervene",
     },
+    recovery: {
+      title: "Recovery",
+      subtitle: "Your AI-generated personalised BNPL debt exit roadmap.",
+      layer: "Recover",
+    },
   };
 
   const renderScreen = () => {
@@ -118,6 +139,8 @@ function App() {
         return <Forecast setScreen={setScreen} />;
       case "checkout":
         return <Checkout setScreen={setScreen} />;
+      case "recovery":
+        return <Recovery setScreen={setScreen} />;
       case "overview":
       default:
         return <Overview setScreen={setScreen} />;
