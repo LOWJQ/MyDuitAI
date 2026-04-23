@@ -1,3 +1,14 @@
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import ForecastScenarioCard from "../components/ForecastScenarioCard";
 import { getUserFinancialContext } from "../lib/getUserFinancialContext";
 
@@ -36,6 +47,44 @@ const getCashTrend = (values) => {
 };
 
 const roundCurrency = (value) => Math.round(value);
+
+function ForecastTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) {
+    return null;
+  }
+
+  const currentValue = payload.find((item) => item.dataKey === "current")?.value ?? 0;
+  const saferValue = payload.find((item) => item.dataKey === "safer")?.value ?? 0;
+
+  return (
+    <div className="rounded-[18px] border border-[#E6E8EC] bg-white px-4 py-3 shadow-[0_18px_40px_rgba(17,24,39,0.12)]">
+      <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">{label}</p>
+      <div className="mt-3 space-y-2">
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-[13px] font-semibold text-[#C53030]">Current path</span>
+          <span className={`text-[14px] ${currentValue < 0 ? "font-bold text-[#C53030]" : "font-semibold text-[#111827]"}`}>
+            RM{currentValue}
+          </span>
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-[13px] font-semibold text-[#0F9D73]">Safer path</span>
+          <span className="text-[14px] font-semibold text-[#111827]">RM{saferValue}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const renderLegend = () => (
+  <div className="flex items-center justify-center gap-3 pt-4">
+    <span className="rounded-full bg-[#FFF1F2] px-4 py-2 text-[12px] font-semibold text-[#C53030]">
+      Current path
+    </span>
+    <span className="rounded-full bg-[#F0FDF4] px-4 py-2 text-[12px] font-semibold text-[#0F9D73]">
+      Safer path
+    </span>
+  </div>
+);
 
 const projectFinancialForecast = (data, metrics) => {
   const { userProfile } = data;
@@ -114,11 +163,16 @@ const projectFinancialForecast = (data, metrics) => {
 };
 
 function Forecast({ setScreen }) {
+  const forecastChartData = [
+    { month: "Apr (now)", current: 156, safer: 156 },
+    { month: "May", current: 42, safer: 310 },
+    { month: "Jun", current: -89, safer: 480 },
+    { month: "Jul", current: -201, safer: 620 },
+  ];
+
   const { data, metrics, scoreResult } = getUserFinancialContext();
   const forecast = projectFinancialForecast(data, metrics);
   const current60Day = forecast.currentBehavior.find((item) => item.days === 60);
-  const safer60Day = forecast.saferBehavior.find((item) => item.days === 60);
-  const comparison60Day = forecast.comparison.find((item) => item.days === 60);
   const pointsToCritical = Math.max(0, scoreResult.score - 40);
   const getNarrativeBorderColor = (line) => {
     const normalizedLine = line.toLowerCase();
@@ -147,17 +201,10 @@ function Forecast({ setScreen }) {
                 Where is my current behavior taking me?
               </h2>
               <p className="mt-4 max-w-3xl text-[15px] leading-relaxed text-[#5F6673]">
-                This is the forward-looking layer of MyDuitAI. It shows where your current
-                spending and Buy Now Pay Later behaviour are likely to take you over the next 30,
-                60, and 90 days.
+                One chart shows the likely path if nothing changes.
               </p>
               <p className="mt-5 max-w-[620px] text-[14px] leading-relaxed text-[#111827]">
-                If nothing changes, the pattern does not stay neutral. It pushes cash lower,
-                repayment pressure higher, and recovery further away.
-              </p>
-              <p className="mt-4 max-w-[620px] text-[13px] leading-relaxed text-[#6B7280]">
-                If the score falls below the critical threshold, MyDuitAI can move from forecast
-                and warning into active AKPK support escalation.
+                Cash falls, repayment pressure rises, and recovery gets harder.
               </p>
             </div>
 
@@ -184,152 +231,83 @@ function Forecast({ setScreen }) {
               Projected outcome
             </p>
             <p className="mt-2 max-w-[760px] text-[18px] leading-relaxed text-[#111827]">
-              If current behaviour continues, Aisha is likely to keep drifting deeper into danger.
               In the next 60 days, remaining cash could fall to{" "}
               <span className="font-semibold text-[#C53030]">
                 {formatCurrency(current60Day?.projectedRemainingCash ?? 0)}
               </span>{" "}
-              while Buy Now Pay Later burden stays elevated.
+              while BNPL burden stays elevated.
             </p>
           </div>
         </section>
 
-        <section className="rounded-[28px] border border-[#F7D7A7] bg-[#FFFBF4] p-8">
-          <div className="grid grid-cols-[minmax(0,1fr)_280px] gap-6">
-            <div>
-              <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[#B7791F]">
-                Escalation threshold
-              </p>
-              <h3 className="mt-2 text-[22px] font-semibold text-[#111827]">
-                When forecast turns into protection
+        <section className="rounded-[28px] border border-[#E6E8EC] bg-white p-8">
+          <div className="flex items-start justify-between gap-6">
+            <div className="max-w-[720px]">
+              <h3 className="text-[20px] font-semibold text-[#111827]">
+                What happens next - two paths
               </h3>
-              <p className="mt-3 max-w-[760px] text-[14px] leading-relaxed text-[#5F6673]">
-                Forecast is the education layer. But if the Financial Stress Score keeps falling
-                into the critical zone, MyDuitAI stops behaving like a passive warning system and
-                starts applying protection at checkout.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <div className="rounded-[22px] border border-[#F7C7C7] bg-white p-5">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#6B7280]">
-                  Distance to critical
-                </p>
-                <p className="mt-2 text-[24px] font-semibold text-[#C53030]">
-                  {pointsToCritical} points
-                </p>
-                <p className="mt-2 text-[13px] leading-relaxed text-[#6B7280]">
-                  Aisha is only {pointsToCritical} points away from the threshold where MyDuitAI
-                  switches from warning into active protection.
-                </p>
-              </div>
-
-              <div className="rounded-[22px] border border-[#F7D7A7] bg-white p-5">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#6B7280]">
-                  What changes at critical risk
-                </p>
-                <div className="mt-3 space-y-2 text-[14px] leading-relaxed text-[#111827]">
-                  <p>1. New Buy Now Pay Later is slowed down by default</p>
-                  <p>2. Manual override is required to continue</p>
-                  <p>3. AKPK support can be surfaced before more debt is added</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="rounded-[28px] border border-[#E6E8EC] bg-white p-8">
-          <div className="flex items-center justify-between gap-6">
-            <div>
-              <h3 className="text-[20px] font-semibold text-[#111827]">At your current pace</h3>
               <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
-                This is the path your finances are on if the current pattern continues through the
-                next 60 days.
+                If nothing changes, cash turns negative by June. Reducing discretionary
+                spending and pausing new BNPL keeps you above zero.
               </p>
             </div>
-            <div className="rounded-[18px] border border-[#EEF1F4] px-5 py-4">
-              <p className="text-[12px] uppercase tracking-[0.08em] text-[#9CA3AF]">
-                Cash flow trend
-              </p>
-              <p className="mt-2 text-[18px] font-semibold text-[#111827] capitalize">
-                {forecast.currentCashTrend}
-              </p>
-            </div>
-          </div>
 
-          <div className="mt-6 rounded-[22px] border border-[#EEF1F4] bg-[#FBFCFE] px-5 py-4">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#6B7280]">
-              60-day outlook
-            </p>
-            <p className="mt-2 text-[15px] leading-relaxed text-[#111827]">
-              If current behaviour continues, your month-end cash buffer is likely to stay under
-              pressure while Buy Now Pay Later repayments continue overlapping with everyday
-              spending.
-            </p>
-          </div>
-
-          <div className="mt-8 grid grid-cols-3 gap-5">
-            {forecast.currentBehavior.map((horizon) => (
-              <div key={horizon.days} className="rounded-[22px] border border-[#EEF1F4] p-5">
-                <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#6B7280]">
-                  {horizon.label}
-                </p>
-                <div className="mt-4 space-y-3 text-[14px]">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#6B7280]">Projected income</span>
-                    <span className="font-semibold text-[#111827]">
-                      {formatCurrency(horizon.projectedIncome)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#6B7280]">Projected spending</span>
-                    <span className="font-semibold text-[#111827]">
-                      {formatCurrency(horizon.projectedSpending)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#6B7280]">Buy Now Pay Later repayments</span>
-                    <span className="font-semibold text-[#C53030]">
-                      {formatCurrency(horizon.projectedBnplRepayments)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#6B7280]">Remaining cash</span>
-                    <span
-                      className={`font-semibold ${
-                        horizon.projectedRemainingCash < 0 ? "text-[#C53030]" : "text-[#111827]"
-                      }`}
-                    >
-                      {formatCurrency(horizon.projectedRemainingCash)}
-                    </span>
-                  </div>
-                </div>
+            <div className="flex items-center gap-3">
+              <div className="rounded-full border border-[#F7C7C7] bg-[#FFF8F8] px-4 py-2 text-[12px] font-semibold text-[#C53030]">
+                Current path: -RM201 by Jul
               </div>
-            ))}
+              <div className="rounded-full border border-[#D7E8D8] bg-[#F7FCF9] px-4 py-2 text-[12px] font-semibold text-[#0F9D73]">
+                Safer path: +RM620 by Jul
+              </div>
+            </div>
           </div>
-        </section>
 
-        <section className="rounded-[28px] border border-[#E6E8EC] bg-white p-8">
-          <h3 className="text-[20px] font-semibold text-[#111827]">Scenario comparison</h3>
-          <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
-            Compare the likely outcome if current behaviour continues versus cutting discretionary
-            spending and avoiding new Buy Now Pay Later usage.
-          </p>
-
-          <div className="mt-6 grid grid-cols-2 gap-6">
-            <ForecastScenarioCard
-              title="Current behavior continues"
-              tone="danger"
-              horizons={forecast.currentBehavior}
-              formatCurrency={formatCurrency}
-            />
-            <ForecastScenarioCard
-              title="Reduce discretionary spending"
-              tone="safer"
-              horizons={forecast.saferBehavior}
-              comparison={forecast.comparison}
-              formatCurrency={formatCurrency}
-            />
+          <div className="relative mt-8 h-[280px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={forecastChartData} margin={{ top: 10, right: 12, left: 4, bottom: 14 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+                <XAxis
+                  dataKey="month"
+                  axisLine={false}
+                  tickLine={false}
+                  tickMargin={10}
+                  tick={{ fontSize: 12, fill: "#9CA3AF" }}
+                />
+                <YAxis
+                  domain={[-250, 700]}
+                  tickFormatter={(value) => `RM${value}`}
+                  axisLine={false}
+                  tickLine={false}
+                  width={64}
+                  tickMargin={10}
+                  tick={{ fontSize: 12, fill: "#9CA3AF" }}
+                />
+                <ReferenceLine
+                  y={0}
+                  stroke="#EF4444"
+                  strokeDasharray="4 4"
+                />
+                <Tooltip content={<ForecastTooltip />} />
+                <Legend verticalAlign="bottom" content={renderLegend} />
+                <Line
+                  type="monotone"
+                  dataKey="current"
+                  stroke="#C53030"
+                  strokeWidth={2.5}
+                  strokeDasharray="6 3"
+                  dot={{ r: 5, fill: "#C53030" }}
+                  name="Current path"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="safer"
+                  stroke="#0F9D73"
+                  strokeWidth={2.5}
+                  dot={{ r: 5, fill: "#0F9D73" }}
+                  name="Safer path"
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
 
           <div className="mt-6 rounded-[22px] border border-[#D7E8D8] bg-[#F7FCF9] p-5">
@@ -337,17 +315,7 @@ function Forecast({ setScreen }) {
               Why acting now matters
             </p>
             <p className="mt-2 text-[15px] leading-relaxed text-[#111827]">
-              If Aisha changes course while she is still in the warning-to-danger range, the next
-              60 days look materially different. Remaining cash improves by{" "}
-              <span className="font-semibold text-[#0F9D73]">
-                {formatCurrency(comparison60Day?.cashImprovement ?? 0)}
-              </span>{" "}
-              and the outlook shifts from{" "}
-              <span className="font-semibold">{current60Day?.riskOutlook?.toLowerCase()}</span> to{" "}
-              <span className="font-semibold text-[#0F9D73]">
-                {safer60Day?.riskOutlook?.toLowerCase()}
-              </span>
-              .
+              If Aisha changes course now, she finishes July with RM620 instead of -RM201 - a RM821 difference. The window to act is still open.
             </p>
           </div>
         </section>
@@ -355,17 +323,27 @@ function Forecast({ setScreen }) {
         <section className="rounded-[28px] border border-[#E6E8EC] bg-white p-8">
           <h3 className="text-[20px] font-semibold text-[#111827]">Where this is heading</h3>
           <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
-            This is the part that matters most: whether your cash buffer is recovering or getting
-            tighter from here.
+            Three moments matter most over the next 90 days.
           </p>
-          <div className="mt-6 space-y-4">
-            {forecast.narrative.map((line) => (
+          <div className="mt-6 grid grid-cols-3 gap-4">
+            {forecast.currentBehavior.map((item) => (
               <div
-                key={line}
-                className="rounded-[20px] border border-[#EEF1F4] px-4 py-3"
-                style={{ borderLeftWidth: 4, borderLeftColor: getNarrativeBorderColor(line) }}
+                key={item.days}
+                className="rounded-[22px] border border-[#EEF1F4] bg-[#FBFCFE] p-5"
               >
-                <p className="text-[14px] leading-relaxed text-[#111827]">{line}</p>
+                <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">
+                  {item.label}
+                </p>
+                <p
+                  className={`mt-3 text-[24px] font-semibold ${
+                    item.projectedRemainingCash < 0 ? "text-[#C53030]" : "text-[#111827]"
+                  }`}
+                >
+                  {formatCurrency(item.projectedRemainingCash)}
+                </p>
+                <p className="mt-2 text-[13px] text-[#6B7280]">
+                  Cash left after bills and BNPL repayments
+                </p>
               </div>
             ))}
           </div>

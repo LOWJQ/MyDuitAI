@@ -1,8 +1,150 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Bar,
+  BarChart,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import CheckoutInterventionPanel from "../components/CheckoutInterventionPanel";
 import RiskDriverList from "../components/RiskDriverList";
 import { evaluateCheckoutImpact } from "../lib/evaluateCheckoutImpact";
 import { getUserFinancialContext } from "../lib/getUserFinancialContext";
+
+function ScoreHealthBar({ scoreBefore, scoreAfter, zoneBefore, zoneAfter }) {
+  const [animatedBefore, setAnimatedBefore] = useState(0);
+  const [animatedAfter, setAnimatedAfter] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setAnimatedBefore(scoreBefore);
+      setAnimatedAfter(scoreAfter);
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [scoreBefore, scoreAfter]);
+
+  return (
+    <div className="rounded-[28px] border border-[#F7C7C7] bg-[#FFF8F8] p-6">
+      <p className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6B7280]">
+        Financial Stress Score impact
+      </p>
+
+      <div className="mt-5 space-y-4">
+        <div className="flex items-center gap-4">
+          <p className="w-16 text-[13px] font-semibold text-[#6B7280]">Before</p>
+          <div className="relative h-[14px] flex-1 overflow-hidden rounded-full bg-[#F3F4F6]">
+            <div
+              className="h-full rounded-full bg-[#F59E0B] transition-all duration-700"
+              style={{ width: `${animatedBefore}%` }}
+            />
+          </div>
+          <p className="w-10 text-right text-[15px] font-semibold text-[#111827]">{scoreBefore}</p>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <p className="w-16 text-[13px] font-semibold text-[#6B7280]">After</p>
+          <div className="relative h-[14px] flex-1 overflow-hidden rounded-full bg-[#F3F4F6]">
+            <div
+              className="h-full rounded-full bg-[#C53030] transition-all duration-700"
+              style={{ width: `${animatedAfter}%` }}
+            />
+          </div>
+          <p className="w-10 text-right text-[15px] font-semibold text-[#111827]">{scoreAfter}</p>
+        </div>
+      </div>
+
+      <div className="mt-5 flex items-center gap-3">
+        <span className="rounded-full bg-[#C53030] px-3 py-1 text-[13px] font-semibold text-white">
+          â–¼ {scoreBefore - scoreAfter} points
+        </span>
+        <span className="text-[13px] text-[#6B7280]">if you proceed with BNPL</span>
+      </div>
+
+      <div className="mt-4 space-y-1">
+        <p className="text-[12px] text-[#6B7280]">Currently: {zoneBefore} zone</p>
+        <p className="text-[12px] text-[#6B7280]">After purchase: {zoneAfter} zone</p>
+      </div>
+    </div>
+  );
+}
+
+function PeerComparisonChart({ userRatio, peerRatio }) {
+  const data = [
+    { label: "Peer average", value: peerRatio, color: "#1652F0" },
+    { label: "You (after)", value: userRatio, color: "#C53030" },
+  ];
+
+  const tooltipContent = ({ active, payload }) => {
+    if (!active || !payload?.length) {
+      return null;
+    }
+
+    const point = payload[0]?.payload;
+
+    return (
+      <div className="rounded-[16px] border border-[#E6E8EC] bg-white px-4 py-3 shadow-[0_18px_40px_rgba(17,24,39,0.12)]">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">
+          {point?.label}
+        </p>
+        <p className="mt-2 text-[14px] font-semibold text-[#111827]">
+          {point?.value}% of monthly income
+        </p>
+      </div>
+    );
+  };
+
+  return (
+    <div className="rounded-[28px] border border-[#E6E8EC] bg-white p-6">
+      <p className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6B7280]">
+        How you compare
+      </p>
+      <h3 className="mt-1 text-[16px] font-semibold text-[#111827]">
+        Your BNPL ratio vs peers with similar income
+      </h3>
+
+      <div className="mt-5 h-[160px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} layout="vertical" margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
+            <XAxis
+              type="number"
+              domain={[0, 50]}
+              tickFormatter={(value) => `${value}%`}
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 12, fill: "#9CA3AF" }}
+            />
+            <YAxis
+              type="category"
+              dataKey="label"
+              width={100}
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 12, fill: "#111827" }}
+            />
+            <Tooltip content={tooltipContent} cursor={{ fill: "rgba(17, 24, 39, 0.03)" }} />
+            <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={28}>
+              {data.map((entry) => (
+                <Cell key={entry.label} fill={entry.color} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="mt-2 rounded-[16px] border border-[#F7C7C7] bg-[#FEF2F2] px-4 py-3">
+        <p className="text-[13px] font-semibold text-[#C53030]">
+          You are {userRatio - peerRatio} percentage points above the safe peer average. This is
+          the danger range.
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function Checkout({ setScreen }) {
   const [showModal, setShowModal] = useState(false);
@@ -271,6 +413,16 @@ function Checkout({ setScreen }) {
             </section>
 
             <section className="space-y-8">
+              <ScoreHealthBar
+                scoreBefore={scoreResult.score}
+                scoreAfter={checkoutImpact.projectedScore}
+                zoneBefore={scoreResult.zone}
+                zoneAfter={checkoutImpact.projectedZone}
+              />
+              <PeerComparisonChart
+                userRatio={checkoutImpact.projectedBnplDebtToIncomeRatio}
+                peerRatio={22}
+              />
               <CheckoutInterventionPanel
                 userName={data.userProfile.name}
                 scoreResult={scoreResult}

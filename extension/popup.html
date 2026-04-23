@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MyDuitAI</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --brand: #1652f0;
+        --text: #111827;
+        --muted: #6b7280;
+        --line: #e5e7eb;
+        --surface: #ffffff;
+        --danger: #c81e1e;
+        --soft-blue: #eef3fd;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        width: 320px;
+        background: linear-gradient(180deg, #f7f9ff 0%, #ffffff 100%);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .shell {
+        padding: 18px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+
+      .brand-mark {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 14px;
+        background: var(--brand);
+        color: #fff;
+        font-size: 18px;
+        box-shadow: 0 14px 30px rgba(22, 82, 240, 0.25);
+      }
+
+      .brand-copy h1 {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+      }
+
+      .brand-copy p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      .hero {
+        border: 1px solid #dbe7ff;
+        border-radius: 20px;
+        padding: 16px;
+        background: var(--soft-blue);
+      }
+
+      .hero-label {
+        margin: 0;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.4;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+      }
+
+      .hero-score {
+        margin: 10px 0 0;
+        color: var(--danger);
+        font-size: 26px;
+        line-height: 1.1;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+      }
+
+      .hero-zone {
+        margin: 6px 0 0;
+        color: var(--danger);
+        font-size: 13px;
+        line-height: 1.4;
+        font-weight: 700;
+      }
+
+      .stats {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .stat {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 13px 14px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--surface);
+      }
+
+      .stat-label {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.4;
+        font-weight: 600;
+      }
+
+      .stat-value {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.2;
+        font-weight: 800;
+        text-align: right;
+      }
+
+      .dashboard-button {
+        width: 100%;
+        margin-top: 16px;
+        border: 0;
+        border-radius: 16px;
+        padding: 14px 16px;
+        background: var(--brand);
+        color: #ffffff;
+        font-size: 15px;
+        line-height: 1.2;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 16px 34px rgba(22, 82, 240, 0.25);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="brand">
+        <div class="brand-mark">M</div>
+        <div class="brand-copy">
+          <h1>MyDuitAI</h1>
+          <p>BNPL guardrails for Shopee Malaysia</p>
+        </div>
+      </div>
+
+      <section class="hero">
+        <p class="hero-label">Financial Stress Score</p>
+        <p class="hero-score" id="score-line">48</p>
+        <p class="hero-zone" id="zone-line">Danger</p>
+      </section>
+
+      <section class="stats">
+        <div class="stat">
+          <p class="stat-label">Active BNPL Plans</p>
+          <p class="stat-value" id="active-plans">4</p>
+        </div>
+        <div class="stat">
+          <p class="stat-label">Monthly BNPL burden</p>
+          <p class="stat-value" id="monthly-burden">RM456</p>
+        </div>
+      </section>
+
+      <button class="dashboard-button" id="dashboard-button" type="button">View Full Dashboard</button>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

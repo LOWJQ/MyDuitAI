@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "MyDuitAI",
+  "version": "1.0.0",
+  "description": "Intervenes on Shopee Malaysia checkout when SPayLater is selected.",
+  "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": ["*://shopee.com.my/*", "*://www.shopee.com.my/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://shopee.com.my/*", "*://www.shopee.com.my/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "MyDuitAI",
+    "default_popup": "popup.html"
+  }
+}

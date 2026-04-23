@@ -1,10 +1,46 @@
 import { useMemo, useState } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import TransactionTable from "../components/TransactionTable";
 import { generateRiskExplanation } from "../lib/generateRiskExplanation";
 import { getUserFinancialContext } from "../lib/getUserFinancialContext";
 
+function BnplTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-[16px] border border-[#E6E8EC] bg-white px-4 py-3 shadow-[0_18px_40px_rgba(17,24,39,0.12)]">
+      <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">{label}</p>
+      <p className="mt-2 text-[14px] font-semibold text-[#C53030]">RM{payload[0]?.value}/month</p>
+    </div>
+  );
+}
+
 function Signals({ setScreen }) {
   const [activeFilter, setActiveFilter] = useState("All");
+  const bnplGrowthData = [
+    { month: "Jan", repayments: 120, color: "#6B7280" },
+    { month: "Feb", repayments: 330, color: "#B7791F" },
+    { month: "Mar", repayments: 456, color: "#C53030" },
+    { month: "Apr", repayments: 606, color: "#991B1B" },
+  ];
+  const repaymentDates = [
+    { date: "Apr 3", provider: "Atome", amount: 150, color: "#6366F1", left: "2%" },
+    { date: "Apr 5", provider: "Atome (last)", amount: 150, color: "#6366F1", left: "26%" },
+    { date: "Apr 9", provider: "Grab PayLater", amount: 126, color: "#0EA5E9", left: "47%" },
+    { date: "Apr 11", provider: "Shopee PayLater", amount: 180, color: "#F59E0B", left: "68%" },
+    { date: "May 11", provider: "SPayLater", amount: 166, color: "#EF4444", left: "98%" },
+  ];
 
   const {
     data,
@@ -74,6 +110,13 @@ function Signals({ setScreen }) {
       value: `${metrics.spendingRatioPercent}% of income`,
       detail: "Spending velocity captures how quickly normal spending is closing the gap between salary and remaining cash.",
     },
+  ];
+  const signalIntensityData = [
+    { label: "BNPL frequency", value: 66, tone: "#1652F0" },
+    { label: "Cash trend", value: 72, tone: "#1652F0" },
+    { label: "Punctuality", value: 58, tone: "#B7791F" },
+    { label: "Debt ratio", value: 88, tone: "#C53030" },
+    { label: "Velocity", value: 84, tone: "#C53030" },
   ];
 
   return (
@@ -186,32 +229,221 @@ function Signals({ setScreen }) {
         </section>
 
         <section className="rounded-[28px] border border-[#E6E8EC] bg-white p-8">
+          <div>
+            <h3 className="text-[20px] font-semibold text-[#111827]">
+              BNPL repayments are growing every month
+            </h3>
+            <p className="mt-2 max-w-[760px] text-[14px] leading-relaxed text-[#6B7280]">
+              Each month, more of Aisha&apos;s RM3,000 salary is locked into installment repayments
+              before she can spend it on anything else.
+            </p>
+          </div>
+
+          <div className="mt-8 h-[200px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={bnplGrowthData} margin={{ top: 4, right: 12, left: 4, bottom: 0 }}>
+                <CartesianGrid stroke="#F3F4F6" vertical={false} />
+                <XAxis
+                  dataKey="month"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: "#9CA3AF" }}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: "#9CA3AF" }}
+                  tickFormatter={(value) => `RM${value}`}
+                />
+                <Tooltip content={<BnplTooltip />} cursor={{ fill: "rgba(17, 24, 39, 0.03)" }} />
+                <Bar dataKey="repayments" radius={[6, 6, 0, 0]}>
+                  {bnplGrowthData.map((entry) => (
+                    <Cell key={entry.month} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="mt-6 grid grid-cols-4 gap-4">
+            {bnplGrowthData.map((item) => (
+              <div
+                key={item.month}
+                className="rounded-[16px] border border-[#EEF1F4] bg-[#FBFCFE] px-4 py-3"
+                style={{ borderLeftWidth: 4, borderLeftColor: item.color }}
+              >
+                <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#6B7280]">
+                  {item.month}
+                </p>
+                <p className="mt-2 text-[15px] font-semibold text-[#111827]">RM{item.repayments}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 rounded-[16px] border border-[#F7C7C7] bg-[#FFF8F8] px-4 py-3">
+            <p className="text-[13px] font-semibold text-[#C53030]">
+              Apr repayments alone consume 20% of Aisha&apos;s monthly income - before rent, food,
+              or transport.
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-[28px] border border-[#E6E8EC] bg-white p-8">
+          <div>
+            <h3 className="text-[20px] font-semibold text-[#C53030]">
+              4 repayment deadlines hit in 9 days
+            </h3>
+            <p className="mt-2 max-w-[760px] text-[14px] leading-relaxed text-[#6B7280]">
+              This is why BNPL feels manageable until it suddenly isn&apos;t - the due dates cluster
+              together against a single salary cycle.
+            </p>
+          </div>
+
+          <div className="mt-10 overflow-hidden">
+            <div className="relative h-[240px] w-full px-8">
+              <div className="absolute left-8 right-8 top-1/2 h-[2px] -translate-y-1/2 bg-[#E6E8EC]" />
+              {repaymentDates.map((item, index) => {
+                const isAbove = index % 2 === 0;
+                const positionClass =
+                  index === 0
+                    ? ""
+                    : index === repaymentDates.length - 1
+                      ? "-translate-x-full"
+                      : "-translate-x-1/2";
+
+                return (
+                  <div
+                    key={`${item.date}-${item.provider}`}
+                    className={`absolute w-[150px] ${positionClass}`}
+                    style={{ left: item.left, top: isAbove ? "12px" : "120px" }}
+                  >
+                    {isAbove ? (
+                      <>
+                        <div
+                          className="mx-auto h-10 w-[2px]"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <div
+                          className="rounded-[12px] border border-[#E6E8EC] bg-white px-3 py-2 text-[12px]"
+                          style={{ borderLeftWidth: 4, borderLeftColor: item.color }}
+                        >
+                          <p className="font-semibold text-[#111827]">{item.date}</p>
+                          <p className="mt-1 text-[#6B7280]">{item.provider}</p>
+                          <p className="mt-1 font-semibold text-[#111827]">RM{item.amount}</p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div
+                          className="rounded-[12px] border border-[#E6E8EC] bg-white px-3 py-2 text-[12px]"
+                          style={{ borderLeftWidth: 4, borderLeftColor: item.color }}
+                        >
+                          <p className="font-semibold text-[#111827]">{item.date}</p>
+                          <p className="mt-1 text-[#6B7280]">{item.provider}</p>
+                          <p className="mt-1 font-semibold text-[#111827]">RM{item.amount}</p>
+                        </div>
+                        <div
+                          className="mx-auto h-10 w-[2px]"
+                          style={{ backgroundColor: item.color }}
+                        />
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mt-8 rounded-[20px] border border-[#F7C7C7] bg-[#FEF2F2] px-5 py-4">
+            <p className="text-[15px] text-[#111827]">
+              Total due in April: <span className="font-semibold text-[#C53030]">RM606</span>{" "}
+              across 4 providers
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-[28px] border border-[#E6E8EC] bg-white p-8">
           <div className="mb-6">
             <h3 className="text-[20px] font-semibold text-[#111827]">
               The 5 signals behind the Financial Stress Score
             </h3>
             <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
-              MyDuitAI continuously monitors five behavioural signals together. These are the core
-              inputs behind the score, not separate dashboard widgets.
+              Five live signals feed the score. Red means the model sees heavy pressure.
             </p>
           </div>
 
-          <div className="grid grid-cols-5 gap-4">
-            {signalCards.map((signal) => (
-              <div
-                key={signal.label}
-                className="rounded-[22px] border border-[#EEF1F4] bg-[#FBFCFE] p-4"
-              >
-                <span
-                  className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] ${signal.tone}`}
+          <div className="grid grid-cols-[minmax(0,1fr)_280px] gap-6">
+            <div className="h-[260px] rounded-[22px] border border-[#EEF1F4] bg-[#FBFCFE] px-4 py-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={signalIntensityData}
+                  layout="vertical"
+                  margin={{ top: 4, right: 16, left: 24, bottom: 4 }}
                 >
-                  {signal.status}
-                </span>
-                <p className="mt-3 text-[14px] leading-relaxed text-[#111827]">{signal.label}</p>
-                <p className="mt-3 text-[18px] font-semibold text-[#111827]">{signal.value}</p>
-                <p className="mt-2 text-[12px] leading-relaxed text-[#6B7280]">{signal.detail}</p>
-              </div>
-            ))}
+                  <CartesianGrid stroke="#F3F4F6" horizontal={false} />
+                  <XAxis
+                    type="number"
+                    domain={[0, 100]}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: "#9CA3AF" }}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="label"
+                    width={92}
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: "#111827" }}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "rgba(17, 24, 39, 0.03)" }}
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) {
+                        return null;
+                      }
+
+                      const point = payload[0]?.payload;
+
+                      return (
+                        <div className="rounded-[16px] border border-[#E6E8EC] bg-white px-4 py-3 shadow-[0_18px_40px_rgba(17,24,39,0.12)]">
+                          <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">
+                            {point?.label}
+                          </p>
+                          <p className="mt-2 text-[15px] font-semibold text-[#111827]">
+                            {point?.value}/100 pressure
+                          </p>
+                        </div>
+                      );
+                    }}
+                  />
+                  <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={20}>
+                    {signalIntensityData.map((entry) => (
+                      <Cell key={entry.label} fill={entry.tone} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="space-y-3">
+              {signalCards.map((signal) => (
+                <div
+                  key={signal.label}
+                  className="rounded-[18px] border border-[#EEF1F4] bg-white px-4 py-3"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-[13px] font-semibold text-[#111827]">{signal.label}</p>
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] ${signal.tone}`}
+                    >
+                      {signal.status}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-[14px] font-semibold text-[#111827]">{signal.value}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -220,7 +452,7 @@ function Signals({ setScreen }) {
             <div>
               <h3 className="text-[20px] font-semibold text-[#111827]">What MyDuitAI is seeing right now</h3>
               <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
-                These are the clearest signals currently pulling the score downward.
+                The strongest downward signals right now.
               </p>
             </div>
             <div className="rounded-[20px] border border-[#EEF1F4] bg-[#FBFCFE] px-4 py-3">
@@ -304,7 +536,7 @@ function Signals({ setScreen }) {
           <section className="rounded-[28px] border border-[#E6E8EC] bg-white p-8">
             <h3 className="text-[20px] font-semibold text-[#111827]">Buy Now Pay Later plans</h3>
             <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
-              These active installment commitments show why repayment pressure is staying elevated.
+              Active commitments keeping repayment pressure high.
             </p>
 
             <div className="mt-6 space-y-4">
@@ -334,7 +566,7 @@ function Signals({ setScreen }) {
           <section className="rounded-[28px] border border-[#E6E8EC] bg-white p-8">
             <h3 className="text-[20px] font-semibold text-[#111827]">Repayment events</h3>
             <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
-              This shows whether repayment strain is already affecting payment behaviour.
+              Payment behaviour under repayment strain.
             </p>
 
             <div className="mt-6 space-y-4">
@@ -413,7 +645,7 @@ function Signals({ setScreen }) {
           <section className="rounded-[28px] border border-[#E6E8EC] bg-white p-8">
             <h3 className="text-[20px] font-semibold text-[#111827]">What changed recently</h3>
             <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
-              These changes over the last 30 days help explain why your score is weakening.
+              Recent shifts that pushed the score lower.
             </p>
 
             <div className="mt-6 space-y-4">

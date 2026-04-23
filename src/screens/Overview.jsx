@@ -1,19 +1,52 @@
 import { useEffect, useRef, useState } from "react";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import RiskDriverList from "../components/RiskDriverList";
 import RiskSummaryCard from "../components/RiskSummaryCard";
-import ScoreGauge from "../components/ScoreGauge";
 import { generateRiskExplanation } from "../lib/generateRiskExplanation";
 import { getUserFinancialContext } from "../lib/getUserFinancialContext";
-
-const timelineSnapshots = [
-  { id: "week-1", label: "3 weeks ago", score: 72, zone: "Warning" },
-  { id: "week-2", label: "2 weeks ago", score: 61, zone: "Warning" },
-  { id: "week-3", label: "Today", score: 48, zone: "Danger" },
-];
 const aiAlertMessage =
-  "Aisha, your Financial Stress Score has dropped 18 points in 3 weeks. Your Buy Now Pay Later usage is up 40%. At this pace, you will have only RM156 left in December.";
+  "AI warning: your score is sliding fast, BNPL load is high, and April cash is down to RM156.";
+
+function CustomScoreTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) {
+    return null;
+  }
+
+  const point = payload[0]?.payload;
+  const score = point?.score ?? 0;
+  const scoreColor = score < 60 ? "#C53030" : score < 80 ? "#B7791F" : "#0F9D73";
+
+  return (
+    <div className="rounded-[18px] bg-white px-4 py-3 shadow-[0_18px_40px_rgba(17,24,39,0.12)]">
+      <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">{label}</p>
+      <p className="mt-2 text-[28px] font-semibold leading-none tracking-[-0.04em]" style={{ color: scoreColor }}>
+        {score}
+      </p>
+      <p className="mt-2 text-[13px] font-semibold text-[#6B7280]">{point?.zone}</p>
+    </div>
+  );
+}
 
 function Overview({ setScreen }) {
+  const scoreTrendData = [
+    { label: "Early Mar", score: 79, zone: "Warning" },
+    { label: "Mid Mar", score: 72, zone: "Warning" },
+    { label: "Late Mar", score: 64, zone: "Warning" },
+    { label: "Early Apr", score: 61, zone: "Warning" },
+    { label: "Mid Apr", score: 57, zone: "Danger" },
+    { label: "This week", score: 52, zone: "Danger" },
+    { label: "Today", score: 48, zone: "Danger" },
+  ];
+
   const { data, metrics, scoreResult, peerComparison, formatCurrency } = getUserFinancialContext();
   const explanations = generateRiskExplanation(metrics).slice(0, 3);
   const explanationDrivers = explanations.map((message, index) => ({
@@ -27,20 +60,9 @@ function Overview({ setScreen }) {
   );
   const trackedMonths = metrics.snapshots?.length ?? 0;
   const monitoredTransactions = data.transactions?.length ?? 0;
-  const [visibleGauges, setVisibleGauges] = useState(1);
   const [showAlert, setShowAlert] = useState(false);
   const [displayedText, setDisplayedText] = useState("");
   const alertCardRef = useRef(null);
-
-  useEffect(() => {
-    const secondGaugeTimer = window.setTimeout(() => setVisibleGauges(2), 900);
-    const thirdGaugeTimer = window.setTimeout(() => setVisibleGauges(3), 1800);
-
-    return () => {
-      window.clearTimeout(secondGaugeTimer);
-      window.clearTimeout(thirdGaugeTimer);
-    };
-  }, []);
 
   useEffect(() => {
     const alertNode = alertCardRef.current;
@@ -99,6 +121,21 @@ function Overview({ setScreen }) {
             0%, 100% { opacity: 1; }
             50% { opacity: 0; }
           }
+
+          @keyframes score-pulse {
+            0% {
+              opacity: 0.85;
+              transform: scale(1);
+            }
+            70% {
+              opacity: 0;
+              transform: scale(1.8);
+            }
+            100% {
+              opacity: 0;
+              transform: scale(1.8);
+            }
+          }
         `}
       </style>
       <div className="mx-auto max-w-[1180px] space-y-5">
@@ -112,18 +149,15 @@ function Overview({ setScreen }) {
                 Predict financial distress before it becomes a crisis
               </h2>
               <p className="mt-4 text-[15px] leading-relaxed text-[#5F6673]">
-                MyDuitAI turns behavioural signals into one forward-looking Financial Stress Score,
-                then guides the user through prediction, education, and intervention before a
-                missed repayment happens.
+                MyDuitAI turns fragmented behaviour into one forward-looking Financial Stress
+                Score before a missed repayment happens.
               </p>
               <p className="mt-5 max-w-[520px] text-[14px] leading-relaxed text-[#111827]">
-                This is not a budgeting dashboard. It is an early-warning system designed to catch
-                risk while there is still time to change course.
+                This is an early-warning system, not a budgeting dashboard.
               </p>
               <p className="mt-4 max-w-[520px] text-[13px] leading-relaxed text-[#6B7280]">
-                If the Financial Stress Score falls into the critical zone, MyDuitAI can escalate
-                from warning into active support by connecting the user to AKPK counselling
-                resources.
+                If risk turns critical, MyDuitAI can escalate into stronger support and AKPK
+                referral pathways.
               </p>
             </div>
 
@@ -178,8 +212,7 @@ function Overview({ setScreen }) {
                 MyDuitAI is watching for drift before the user feels the crisis
               </h3>
               <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
-                This is what makes the product predictive instead of reactive. The score is not a
-                monthly summary. It is produced from a rolling stream of behavioural signals.
+                The score reacts to live behaviour, not a static monthly summary.
               </p>
             </div>
             <div className="rounded-[18px] border border-[#EEF1F4] bg-[#FBFCFE] px-4 py-3">
@@ -197,7 +230,7 @@ function Overview({ setScreen }) {
               </p>
               <p className="mt-3 text-[20px] font-semibold text-[#111827]">5 live signals</p>
               <p className="mt-2 text-[13px] leading-relaxed text-[#6B7280]">
-                Usage frequency, cash trend, punctuality, debt ratio, and spending velocity.
+                Frequency, cash trend, punctuality, debt ratio, and velocity.
               </p>
             </div>
 
@@ -209,8 +242,7 @@ function Overview({ setScreen }) {
                 {trackedMonths} months of history
               </p>
               <p className="mt-2 text-[13px] leading-relaxed text-[#6B7280]">
-                Alerts are based on drift from Aisha&apos;s normal pattern, not generic spending
-                rules.
+                Alerts are based on drift from baseline.
               </p>
             </div>
 
@@ -222,8 +254,7 @@ function Overview({ setScreen }) {
                 {monitoredTransactions} transactions
               </p>
               <p className="mt-2 text-[13px] leading-relaxed text-[#6B7280]">
-                Bank and installment activity are combined into one rolling picture of financial
-                stress.
+                One merged view of cash and installments.
               </p>
             </div>
 
@@ -235,8 +266,7 @@ function Overview({ setScreen }) {
                 Critical score triggers friction
               </p>
               <p className="mt-2 text-[13px] leading-relaxed text-[#6B7280]">
-                If risk worsens, checkout moves from warning into protection and can surface AKPK
-                support.
+                Checkout adds friction when risk worsens.
               </p>
             </div>
           </div>
@@ -251,9 +281,7 @@ function Overview({ setScreen }) {
                 How the Financial Stress Score escalates
               </h3>
               <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
-                MyDuitAI does not wait for missed payments to happen. As the score moves through
-                these zones, the product shifts from prediction to warning, then to intervention
-                and support.
+                As the score falls, the product shifts from warning to protection.
               </p>
             </div>
             <div className="rounded-[18px] border border-[#EEF1F4] bg-[#FBFCFE] px-4 py-3">
@@ -269,25 +297,25 @@ function Overview({ setScreen }) {
               {
                 title: "Stable",
                 range: "80-100",
-                copy: "Healthy room to absorb commitments and recover from normal spending swings.",
+                copy: "Healthy room to absorb commitments.",
                 tone: "border-[#D7E8D8] bg-[#F7FCF9] text-[#0F9D73]",
               },
               {
                 title: "Warning",
                 range: "60-79",
-                copy: "Early strain is forming. This is where MyDuitAI starts surfacing stronger alerts.",
+                copy: "Early strain is forming.",
                 tone: "border-[#F7D7A7] bg-[#FFFBF4] text-[#B7791F]",
               },
               {
                 title: "Danger",
                 range: "40-59",
-                copy: "Cash buffers and repayment pressure are overlapping. Intervention becomes important.",
+                copy: "Cash and repayment pressure are overlapping.",
                 tone: "border-[#F7C7C7] bg-[#FFF8F8] text-[#C53030]",
               },
               {
                 title: "Critical",
                 range: "0-39",
-                copy: "Protective action and AKPK support can be triggered before deeper harm happens.",
+                copy: "Protective action can be triggered here.",
                 tone: "border-[#F7C7C7] bg-[#FFF4F4] text-[#991B1B]",
               },
             ].map((item) => {
@@ -314,45 +342,89 @@ function Overview({ setScreen }) {
         </section>
 
         <section className="rounded-[28px] border border-[#E6E8EC] bg-white p-8">
-          <h3 className="text-[20px] font-semibold text-[#111827]">Your score over the last 3 weeks</h3>
-          <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
-            MyDuitAI detected the decline before it became a crisis.
-          </p>
-
-          <div className="mt-8 grid grid-cols-3 gap-6">
-            {timelineSnapshots.map((snapshot, index) => {
-              const isVisible = visibleGauges >= index + 1;
-              const isCurrent = index === timelineSnapshots.length - 1 && visibleGauges >= 3;
-
-              return (
-                <div
-                  key={snapshot.id}
-                  className={`flex flex-col items-center rounded-[24px] border border-[#EEF1F4] bg-[#FBFCFE] px-4 py-6 transition-opacity duration-700 ${
-                    isVisible ? "opacity-100" : "opacity-0"
-                  }`}
-                >
-                  <div
-                    className={`rounded-full ${
-                      isCurrent ? "ring-2 ring-red-400 ring-offset-2 animate-pulse" : ""
-                    }`}
-                  >
-                    <ScoreGauge score={snapshot.score} />
-                  </div>
-                  <p className="mt-3 text-[15px] font-semibold text-[#111827]">{snapshot.label}</p>
-                  <p className="mt-1 text-[13px] text-[#6B7280]">{snapshot.zone}</p>
-                </div>
-              );
-            })}
+          <div className="max-w-[760px]">
+            <h3 className="text-[20px] font-semibold text-[#111827]">
+              Financial Stress Score - last 7 weeks
+            </h3>
+            <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
+              The score has dropped 31 points since early March.
+            </p>
           </div>
 
-          <div className="mt-8 flex items-center px-6">
-            <div className="h-[2px] flex-1 bg-[#D1D5DB]" />
-            <div className="mx-2 h-3 w-3 rounded-full bg-[#9CA3AF]" />
-            <div className="h-[2px] flex-1 bg-[#D1D5DB]" />
-            <div className="mx-2 h-3 w-3 rounded-full bg-[#9CA3AF]" />
-            <div className="h-[2px] flex-1 bg-[#FCA5A5]" />
-            <div className="mx-2 h-3 w-3 rounded-full bg-[#C53030]" />
-            <div className="h-[2px] flex-1 bg-[#FCA5A5]" />
+          <div className="mt-8 h-[240px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={scoreTrendData} margin={{ top: 10, right: 12, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#C53030" stopOpacity={0.15} />
+                    <stop offset="100%" stopColor="#C53030" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+                <XAxis
+                  dataKey="label"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: "#9CA3AF" }}
+                />
+                <YAxis
+                  domain={[30, 100]}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: "#9CA3AF" }}
+                />
+                <ReferenceLine
+                  y={60}
+                  stroke="#B7791F"
+                  strokeDasharray="6 6"
+                  ifOverflow="extendDomain"
+                  label={{ value: "Warning", position: "insideTopRight", fill: "#B7791F", fontSize: 12 }}
+                />
+                <ReferenceLine
+                  y={40}
+                  stroke="#C53030"
+                  strokeDasharray="6 6"
+                  ifOverflow="extendDomain"
+                  label={{ value: "Critical", position: "insideTopRight", fill: "#C53030", fontSize: 12 }}
+                />
+                <Tooltip content={<CustomScoreTooltip />} cursor={{ stroke: "#F3F4F6", strokeWidth: 1.5 }} />
+                <Area
+                  type="monotone"
+                  dataKey="score"
+                  stroke="#C53030"
+                  strokeWidth={2.5}
+                  fill="url(#scoreGrad)"
+                  dot={(props) => {
+                    const { cx, cy, index } = props;
+                    const isLast = index === scoreTrendData.length - 1;
+
+                    if (typeof cx !== "number" || typeof cy !== "number") {
+                      return null;
+                    }
+
+                    if (!isLast) {
+                      return <circle cx={cx} cy={cy} r={4} fill="#D1D5DB" stroke="#FFFFFF" strokeWidth={2} />;
+                    }
+
+                    return (
+                      <g>
+                        <circle
+                          cx={cx}
+                          cy={cy}
+                          r={8}
+                          fill="none"
+                          stroke="#C53030"
+                          strokeWidth={2}
+                          style={{ transformOrigin: `${cx}px ${cy}px`, animation: "score-pulse 1.8s ease-out infinite" }}
+                        />
+                        <circle cx={cx} cy={cy} r={6} fill="#C53030" stroke="#FFFFFF" strokeWidth={3} />
+                      </g>
+                    );
+                  }}
+                  activeDot={{ r: 6, fill: "#C53030", stroke: "#FFFFFF", strokeWidth: 3 }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </section>
 
@@ -399,8 +471,7 @@ function Overview({ setScreen }) {
             <div className="max-w-[560px]">
               <h3 className="text-[20px] font-semibold text-[#111827]">How you compare</h3>
               <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
-                MyDuitAI does not only look at your own trend. It also checks whether your Buy Now
-                Pay Later burden is drifting away from what is typical for users with similar
+                MyDuitAI also checks whether your BNPL burden is drifting above peers with similar
                 income.
               </p>
               <p className="mt-4 text-[14px] leading-relaxed text-[#111827]">
@@ -469,7 +540,7 @@ function Overview({ setScreen }) {
             </span>
             <span className="mx-4 text-[#E5E7EB]">|</span>
             <span>
-              December balance <span className="font-semibold text-[#991B1B]">RM156</span>
+              April balance <span className="font-semibold text-[#991B1B]">RM156</span>
             </span>
           </div>
 
@@ -513,11 +584,10 @@ function Overview({ setScreen }) {
                 What should happen next
               </p>
               <h3 className="mt-2 text-[20px] font-semibold text-[#111827]">
-                Decide whether to inspect the evidence or project the next 60 days
+                Pick the next view
               </h3>
               <p className="mt-3 text-[14px] leading-relaxed text-[#6B7280]">
-                If you want to understand why the score is weakening, go to Signals. If you want
-                to see where this pattern leads if nothing changes, go to Forecast.
+                Signals shows why. Forecast shows what happens next.
               </p>
             </div>
 
@@ -532,7 +602,7 @@ function Overview({ setScreen }) {
                 </p>
                 <p className="mt-2 text-[17px] font-semibold text-[#111827]">See the Signals</p>
                 <p className="mt-2 text-[13px] leading-relaxed text-[#5F6673]">
-                  Review the behavioural evidence behind the Financial Stress Score.
+                  Review the behaviour behind the score.
                 </p>
               </button>
 
@@ -546,7 +616,7 @@ function Overview({ setScreen }) {
                 </p>
                 <p className="mt-2 text-[17px] font-semibold text-[#111827]">See the Forecast</p>
                 <p className="mt-2 text-[13px] leading-relaxed text-[#5F6673]">
-                  See where the next 30, 60, and 90 days are heading if behaviour stays the same.
+                  See the likely path over the next 30, 60, and 90 days.
                 </p>
               </button>
             </div>

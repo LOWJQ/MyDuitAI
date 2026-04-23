@@ -12,7 +12,7 @@ export const mockUserData = {
   transactions: [
     {
       id: "txn-001",
-      date: "2025-09-25",
+      date: "2026-01-25",
       description: "Monthly salary credited",
       merchant: "Bright Connect Sdn Bhd",
       source: "Bright Connect Sdn Bhd",
@@ -26,7 +26,7 @@ export const mockUserData = {
     },
     {
       id: "txn-002",
-      date: "2025-09-26",
+      date: "2026-01-26",
       description: "Room rental transfer",
       merchant: "Puan Salmah",
       source: "Puan Salmah",
@@ -40,7 +40,7 @@ export const mockUserData = {
     },
     {
       id: "txn-003",
-      date: "2025-09-27",
+      date: "2026-01-27",
       description: "Groceries and household restock",
       merchant: "Jaya Grocer",
       source: "Jaya Grocer",
@@ -54,7 +54,7 @@ export const mockUserData = {
     },
     {
       id: "txn-004",
-      date: "2025-09-28",
+      date: "2026-01-28",
       description: "Phone plan autopay",
       merchant: "CelcomDigi",
       source: "CelcomDigi",
@@ -68,7 +68,7 @@ export const mockUserData = {
     },
     {
       id: "txn-005",
-      date: "2025-10-03",
+      date: "2026-02-03",
       description: "Grab rides to office",
       merchant: "Grab",
       source: "Grab",
@@ -82,7 +82,7 @@ export const mockUserData = {
     },
     {
       id: "txn-006",
-      date: "2025-10-05",
+      date: "2026-02-05",
       description: "Atome monthly installment",
       merchant: "Atome",
       source: "Atome",
@@ -96,7 +96,7 @@ export const mockUserData = {
     },
     {
       id: "txn-007",
-      date: "2025-10-10",
+      date: "2026-02-10",
       description: "Lunch delivery after work",
       merchant: "GrabFood",
       source: "GrabFood",
@@ -110,7 +110,7 @@ export const mockUserData = {
     },
     {
       id: "txn-008",
-      date: "2025-10-18",
+      date: "2026-02-18",
       description: "Spotify Premium family",
       merchant: "Spotify",
       source: "Spotify",
@@ -124,7 +124,7 @@ export const mockUserData = {
     },
     {
       id: "txn-009",
-      date: "2025-10-25",
+      date: "2026-02-25",
       description: "Monthly salary credited",
       merchant: "Bright Connect Sdn Bhd",
       source: "Bright Connect Sdn Bhd",
@@ -138,7 +138,7 @@ export const mockUserData = {
     },
     {
       id: "txn-010",
-      date: "2025-10-26",
+      date: "2026-02-26",
       description: "Room rental transfer",
       merchant: "Puan Salmah",
       source: "Puan Salmah",
@@ -152,7 +152,7 @@ export const mockUserData = {
     },
     {
       id: "txn-011",
-      date: "2025-10-28",
+      date: "2026-02-28",
       description: "Weekly groceries",
       merchant: "NSK Grocer",
       source: "NSK Grocer",
@@ -166,7 +166,7 @@ export const mockUserData = {
     },
     {
       id: "txn-012",
-      date: "2025-10-31",
+      date: "2026-02-28",
       description: "Streaming subscriptions",
       merchant: "Netflix",
       source: "Netflix",
@@ -180,7 +180,7 @@ export const mockUserData = {
     },
     {
       id: "txn-013",
-      date: "2025-10-15",
+      date: "2026-02-15",
       description: "Atome monthly installment",
       merchant: "Atome",
       source: "Atome",
@@ -194,7 +194,7 @@ export const mockUserData = {
     },
     {
       id: "txn-014",
-      date: "2025-10-16",
+      date: "2026-02-16",
       description: "Shopee order split with Buy Now Pay Later",
       merchant: "Shopee",
       source: "Shopee",
@@ -208,7 +208,7 @@ export const mockUserData = {
     },
     {
       id: "txn-015",
-      date: "2025-10-18",
+      date: "2026-02-18",
       description: "Shopee PayLater installment paid late",
       merchant: "Shopee PayLater",
       source: "Shopee PayLater",
@@ -222,7 +222,7 @@ export const mockUserData = {
     },
     {
       id: "txn-016",
-      date: "2025-11-14",
+      date: "2026-03-14",
       description: "Coffee and snacks",
       merchant: "ZUS Coffee",
       source: "ZUS Coffee",
@@ -236,7 +236,7 @@ export const mockUserData = {
     },
     {
       id: "txn-017",
-      date: "2025-11-18",
+      date: "2026-03-18",
       description: "Transfer to mother",
       merchant: "Family transfer",
       source: "Family transfer",
@@ -250,7 +250,7 @@ export const mockUserData = {
     },
     {
       id: "txn-018",
-      date: "2025-11-25",
+      date: "2026-03-25",
       description: "Monthly salary credited",
       merchant: "Bright Connect Sdn Bhd",
       source: "Bright Connect Sdn Bhd",
@@ -264,7 +264,7 @@ export const mockUserData = {
     },
     {
       id: "txn-019",
-      date: "2025-11-26",
+      date: "2026-03-26",
       description: "Room rental transfer",
       merchant: "Puan Salmah",
       source: "Puan Salmah",
@@ -278,7 +278,7 @@ export const mockUserData = {
     },
     {
       id: "txn-020",
-      date: "2025-11-28",
+      date: "2026-03-28",
       description: "Groceries and toiletries",
       merchant: "Lotus's Ampang",
       source: "Lotus's Ampang",
@@ -292,7 +292,7 @@ export const mockUserData = {
     },
     {
       id: "txn-021",
-      date: "2025-12-03",
+      date: "2026-04-03",
       description: "Atome monthly installment",
       merchant: "Atome",
       source: "Atome",
@@ -306,7 +306,7 @@ export const mockUserData = {
     },
     {
       id: "txn-022",
-      date: "2025-12-06",
+      date: "2026-04-06",
       description: "Concert ticket split with Buy Now Pay Later",
       merchant: "Ticket2U",
       source: "Ticket2U",
@@ -320,7 +320,7 @@ export const mockUserData = {
     },
     {
       id: "txn-023",
-      date: "2025-12-09",
+      date: "2026-04-09",
       description: "Grab PayLater monthly installment",
       merchant: "Grab PayLater",
       source: "Grab PayLater",
@@ -334,7 +334,7 @@ export const mockUserData = {
     },
     {
       id: "txn-024",
-      date: "2025-12-11",
+      date: "2026-04-11",
       description: "Shopee PayLater monthly installment",
       merchant: "Shopee PayLater",
       source: "Shopee PayLater",
@@ -348,7 +348,7 @@ export const mockUserData = {
     },
     {
       id: "txn-025",
-      date: "2025-12-14",
+      date: "2026-04-14",
       description: "Weekend food delivery",
       merchant: "foodpanda",
       source: "foodpanda",
@@ -362,7 +362,7 @@ export const mockUserData = {
     },
     {
       id: "txn-026",
-      date: "2025-12-16",
+      date: "2026-04-16",
       description: "Touch 'n Go reload and tolls",
       merchant: "Touch 'n Go eWallet",
       source: "Touch 'n Go eWallet",
@@ -376,7 +376,7 @@ export const mockUserData = {
     },
     {
       id: "txn-027",
-      date: "2025-12-18",
+      date: "2026-04-18",
       description: "Electricity and home utilities",
       merchant: "TNB",
       source: "TNB",
@@ -399,7 +399,7 @@ export const mockUserData = {
       installmentAmount: 150,
       installmentsTotal: 6,
       installmentsRemaining: 3,
-      nextDueDate: "2025-12-05",
+      nextDueDate: "2026-05-05",
       status: "active",
       category: "Shopping",
     },
@@ -412,7 +412,7 @@ export const mockUserData = {
       installmentAmount: 180,
       installmentsTotal: 4,
       installmentsRemaining: 2,
-      nextDueDate: "2025-12-11",
+      nextDueDate: "2026-05-11",
       status: "active",
       category: "Home",
     },
@@ -425,7 +425,7 @@ export const mockUserData = {
       installmentAmount: 126,
       installmentsTotal: 3,
       installmentsRemaining: 1,
-      nextDueDate: "2025-12-09",
+      nextDueDate: "2026-05-09",
       status: "active",
       category: "Entertainment",
     },
@@ -438,7 +438,7 @@ export const mockUserData = {
       installmentAmount: 166,
       installmentsTotal: 3,
       installmentsRemaining: 3,
-      nextDueDate: "2026-01-11",
+      nextDueDate: "2026-05-11",
       status: "active",
       category: "Electronics",
     },
@@ -447,8 +447,8 @@ export const mockUserData = {
     {
       id: "rep-001",
       planId: "bnpl-001",
-      dueDate: "2025-10-05",
-      paidDate: "2025-10-05",
+      dueDate: "2026-02-05",
+      paidDate: "2026-02-05",
       amount: 150,
       status: "on_time",
       daysLate: 0,
@@ -456,8 +456,8 @@ export const mockUserData = {
     {
       id: "rep-002",
       planId: "bnpl-001",
-      dueDate: "2025-11-05",
-      paidDate: "2025-11-05",
+      dueDate: "2026-03-05",
+      paidDate: "2026-03-05",
       amount: 150,
       status: "on_time",
       daysLate: 0,
@@ -465,8 +465,8 @@ export const mockUserData = {
     {
       id: "rep-003",
       planId: "bnpl-002",
-      dueDate: "2025-11-10",
-      paidDate: "2025-11-12",
+      dueDate: "2026-03-10",
+      paidDate: "2026-03-12",
       amount: 180,
       status: "late",
       daysLate: 2,
@@ -474,8 +474,8 @@ export const mockUserData = {
     {
       id: "rep-004",
       planId: "bnpl-002",
-      dueDate: "2025-12-11",
-      paidDate: "2025-12-11",
+      dueDate: "2026-04-11",
+      paidDate: "2026-04-11",
       amount: 180,
       status: "on_time",
       daysLate: 0,
@@ -483,8 +483,8 @@ export const mockUserData = {
     {
       id: "rep-005",
       planId: "bnpl-003",
-      dueDate: "2025-12-09",
-      paidDate: "2025-12-09",
+      dueDate: "2026-04-09",
+      paidDate: "2026-04-09",
       amount: 126,
       status: "on_time",
       daysLate: 0,
@@ -492,8 +492,8 @@ export const mockUserData = {
     {
       id: "rep-006",
       planId: "bnpl-001",
-      dueDate: "2025-12-05",
-      paidDate: "2025-12-05",
+      dueDate: "2026-04-05",
+      paidDate: "2026-04-05",
       amount: 150,
       status: "on_time",
       daysLate: 0,
@@ -501,7 +501,7 @@ export const mockUserData = {
   ],
   monthlySnapshots: [
     {
-      month: "Sep",
+      month: "Jan",
       income: 3000,
       essentialSpending: 1365,
       discretionarySpending: 455,
@@ -512,7 +512,7 @@ export const mockUserData = {
       bnplDebtToIncomeRatio: 0.04,
     },
     {
-      month: "Oct",
+      month: "Feb",
       income: 3000,
       essentialSpending: 1405,
       discretionarySpending: 520,
@@ -523,7 +523,7 @@ export const mockUserData = {
       bnplDebtToIncomeRatio: 0.07,
     },
     {
-      month: "Nov",
+      month: "Mar",
       income: 3000,
       essentialSpending: 1440,
       discretionarySpending: 595,
@@ -534,7 +534,7 @@ export const mockUserData = {
       bnplDebtToIncomeRatio: 0.11,
     },
     {
-      month: "Dec",
+      month: "Apr",
       income: 3000,
       essentialSpending: 1470,
       discretionarySpending: 620,
