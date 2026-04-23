@@ -28,20 +28,6 @@ function BnplTooltip({ active, payload, label }) {
 
 function Signals({ setScreen }) {
   const [activeFilter, setActiveFilter] = useState("All");
-  const bnplGrowthData = [
-    { month: "Jan", repayments: 120, color: "#6B7280" },
-    { month: "Feb", repayments: 330, color: "#B7791F" },
-    { month: "Mar", repayments: 456, color: "#C53030" },
-    { month: "Apr", repayments: 606, color: "#991B1B" },
-  ];
-  const repaymentDates = [
-    { date: "Apr 3", provider: "Atome", amount: 150, color: "#6366F1", left: "2%" },
-    { date: "Apr 5", provider: "Atome (last)", amount: 150, color: "#6366F1", left: "26%" },
-    { date: "Apr 9", provider: "Grab PayLater", amount: 126, color: "#0EA5E9", left: "47%" },
-    { date: "Apr 11", provider: "Shopee PayLater", amount: 180, color: "#F59E0B", left: "68%" },
-    { date: "May 11", provider: "SPayLater", amount: 166, color: "#EF4444", left: "98%" },
-  ];
-
   const {
     data,
     metrics,
@@ -51,6 +37,27 @@ function Signals({ setScreen }) {
     recurringCommitments,
     formatCurrency,
   } = getUserFinancialContext();
+  const bnplGrowthData = metrics.snapshots.map((snapshot, index) => ({
+    month: snapshot.month,
+    repayments: snapshot.bnplRepayments,
+    color: ["#6B7280", "#B7791F", "#C53030", "#991B1B"][index] ?? "#991B1B",
+  }));
+  const repaymentDates = [
+    { date: "Apr 3", provider: "Atome", amount: 220, color: "#6366F1", left: "2%" },
+    { date: "Apr 5", provider: "Atome (last)", amount: 220, color: "#6366F1", left: "24%" },
+    { date: "Apr 9", provider: "Grab PayLater", amount: 180, color: "#0EA5E9", left: "46%" },
+    { date: "Apr 11", provider: "Shopee PayLater", amount: 260, color: "#F59E0B", left: "66%" },
+    { date: "May 11", provider: "SPayLater", amount: 166, color: "#EF4444", left: "86%" },
+  ];
+  const currentBudgetBreakdown = data.currentBudgetBreakdown.map((item) => ({
+    ...item,
+    pct: (item.amount / data.userProfile.monthlyIncome) * 100,
+    pctLabel: `${Math.max(1, Math.round((item.amount / data.userProfile.monthlyIncome) * 100))}%`,
+  }));
+  const remainingCashShare = Math.max(
+    1,
+    Math.round((metrics.latestEndingBalance / data.userProfile.monthlyIncome) * 100),
+  );
   const explanations = generateRiskExplanation(metrics);
   const activeProviderCount = new Set(
     bnplPlans.filter((plan) => plan.status === "active").map((plan) => plan.provider),
@@ -112,7 +119,7 @@ function Signals({ setScreen }) {
     },
   ];
   const signalIntensityData = [
-    { label: "BNPL frequency", value: 66, tone: "#1652F0" },
+    { label: "Buy Now Pay Later", value: 66, tone: "#1652F0" },
     { label: "Cash trend", value: 72, tone: "#1652F0" },
     { label: "Punctuality", value: 58, tone: "#B7791F" },
     { label: "Debt ratio", value: 88, tone: "#C53030" },
@@ -231,7 +238,7 @@ function Signals({ setScreen }) {
         <section className="rounded-[28px] border border-[#E6E8EC] bg-white p-8">
           <div>
             <h3 className="text-[20px] font-semibold text-[#111827]">
-              BNPL repayments are growing every month
+              Buy Now Pay Later repayments are growing every month
             </h3>
             <p className="mt-2 max-w-[760px] text-[14px] leading-relaxed text-[#6B7280]">
               Each month, more of Aisha&apos;s RM3,000 salary is locked into installment repayments
@@ -282,7 +289,7 @@ function Signals({ setScreen }) {
 
           <div className="mt-4 rounded-[16px] border border-[#F7C7C7] bg-[#FFF8F8] px-4 py-3">
             <p className="text-[13px] font-semibold text-[#C53030]">
-              Apr repayments alone consume 20% of Aisha&apos;s monthly income - before rent, food,
+              April repayments alone consume 28% of Aisha&apos;s monthly income - before rent, food,
               or transport.
             </p>
           </div>
@@ -294,7 +301,7 @@ function Signals({ setScreen }) {
               4 repayment deadlines hit in 9 days
             </h3>
             <p className="mt-2 max-w-[760px] text-[14px] leading-relaxed text-[#6B7280]">
-              This is why BNPL feels manageable until it suddenly isn&apos;t - the due dates cluster
+              This is why Buy Now Pay Later feels manageable until it suddenly isn&apos;t - the due dates cluster
               together against a single salary cycle.
             </p>
           </div>
@@ -308,7 +315,7 @@ function Signals({ setScreen }) {
                   index === 0
                     ? ""
                     : index === repaymentDates.length - 1
-                      ? "-translate-x-full"
+                      ? "-translate-x-[80%]"
                       : "-translate-x-1/2";
 
                 return (
@@ -356,8 +363,8 @@ function Signals({ setScreen }) {
 
           <div className="mt-8 rounded-[20px] border border-[#F7C7C7] bg-[#FEF2F2] px-5 py-4">
             <p className="text-[15px] text-[#111827]">
-              Total due in April: <span className="font-semibold text-[#C53030]">RM606</span>{" "}
-              across 4 providers
+              Total due between Apr 3 and Apr 11:{" "}
+              <span className="font-semibold text-[#C53030]">RM880</span> across 4 repayment hits
             </p>
           </div>
         </section>
@@ -372,78 +379,78 @@ function Signals({ setScreen }) {
             </p>
           </div>
 
-          <div className="grid grid-cols-[minmax(0,1fr)_280px] gap-6">
-            <div className="h-[260px] rounded-[22px] border border-[#EEF1F4] bg-[#FBFCFE] px-4 py-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={signalIntensityData}
-                  layout="vertical"
-                  margin={{ top: 4, right: 16, left: 24, bottom: 4 }}
-                >
-                  <CartesianGrid stroke="#F3F4F6" horizontal={false} />
-                  <XAxis
-                    type="number"
-                    domain={[0, 100]}
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: "#9CA3AF" }}
-                  />
-                  <YAxis
-                    type="category"
-                    dataKey="label"
-                    width={92}
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: "#111827" }}
-                  />
-                  <Tooltip
-                    cursor={{ fill: "rgba(17, 24, 39, 0.03)" }}
-                    content={({ active, payload }) => {
-                      if (!active || !payload?.length) {
-                        return null;
-                      }
+          <div className="h-[260px] rounded-[22px] border border-[#EEF1F4] bg-[#FBFCFE] px-4 py-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={signalIntensityData}
+                layout="vertical"
+                margin={{ top: 4, right: 16, left: 24, bottom: 4 }}
+              >
+                <CartesianGrid stroke="#F3F4F6" horizontal={false} />
+                <XAxis
+                  type="number"
+                  domain={[0, 100]}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: "#9CA3AF" }}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="label"
+                  width={92}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: "#111827" }}
+                />
+                <Tooltip
+                  cursor={{ fill: "rgba(17, 24, 39, 0.03)" }}
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.length) {
+                      return null;
+                    }
 
-                      const point = payload[0]?.payload;
+                    const point = payload[0]?.payload;
 
-                      return (
-                        <div className="rounded-[16px] border border-[#E6E8EC] bg-white px-4 py-3 shadow-[0_18px_40px_rgba(17,24,39,0.12)]">
-                          <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">
-                            {point?.label}
-                          </p>
-                          <p className="mt-2 text-[15px] font-semibold text-[#111827]">
-                            {point?.value}/100 pressure
-                          </p>
-                        </div>
-                      );
-                    }}
-                  />
-                  <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={20}>
-                    {signalIntensityData.map((entry) => (
-                      <Cell key={entry.label} fill={entry.tone} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+                    return (
+                      <div className="rounded-[16px] border border-[#E6E8EC] bg-white px-4 py-3 shadow-[0_18px_40px_rgba(17,24,39,0.12)]">
+                        <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">
+                          {point?.label}
+                        </p>
+                        <p className="mt-2 text-[15px] font-semibold text-[#111827]">
+                          {point?.value}/100 pressure
+                        </p>
+                      </div>
+                    );
+                  }}
+                />
+                <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={20}>
+                  {signalIntensityData.map((entry) => (
+                    <Cell key={entry.label} fill={entry.tone} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
 
-            <div className="space-y-3">
-              {signalCards.map((signal) => (
-                <div
-                  key={signal.label}
-                  className="rounded-[18px] border border-[#EEF1F4] bg-white px-4 py-3"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-[13px] font-semibold text-[#111827]">{signal.label}</p>
-                    <span
-                      className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] ${signal.tone}`}
-                    >
-                      {signal.status}
-                    </span>
-                  </div>
-                  <p className="mt-2 text-[14px] font-semibold text-[#111827]">{signal.value}</p>
+          <div className="mt-6 grid grid-cols-3 gap-3">
+            {signalCards.map((signal) => (
+              <div
+                key={signal.label}
+                className="rounded-[18px] border border-[#EEF1F4] bg-white px-4 py-3"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-[13px] font-semibold leading-snug text-[#111827]">
+                    {signal.label}
+                  </p>
+                  <span
+                    className={`inline-flex shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] ${signal.tone}`}
+                  >
+                    {signal.status}
+                  </span>
                 </div>
-              ))}
-            </div>
+                <p className="mt-2 text-[14px] font-semibold text-[#111827]">{signal.value}</p>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -482,18 +489,68 @@ function Signals({ setScreen }) {
         </section>
 
         <section className="rounded-[28px] border border-[#E6E8EC] bg-white p-8">
-          <h3 className="text-[20px] font-semibold text-[#111827]">Why the score is dropping</h3>
-          <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
-            These explanations connect the score to the underlying behaviour across spending,
-            repayment timing, and a shrinking cash buffer.
-          </p>
-
-          <div className="mt-6 space-y-4">
-            {explanations.map((explanation) => (
-              <div key={explanation} className="rounded-[22px] border border-[#EEF1F4] px-5 py-4">
-                <p className="text-[14px] leading-relaxed text-[#111827]">{explanation}</p>
+          <div className="grid grid-cols-[minmax(0,1fr)_260px] gap-8 items-center">
+            <div>
+              <h3 className="text-[20px] font-semibold text-[#111827]">Where April&apos;s RM3,000 goes</h3>
+              <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
+                After salary comes in, only {formatCurrency(metrics.latestEndingBalance)} remains - less than {remainingCashShare}% of income.
+              </p>
+              <div className="mt-6 space-y-3">
+                {currentBudgetBreakdown.map((item) => (
+                  <div key={item.label} className="flex items-center gap-3">
+                    <div className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-[13px] font-semibold text-[#111827]">{item.label}</p>
+                        <p className="text-[13px] font-semibold text-[#111827]">RM{item.amount}</p>
+                      </div>
+                      <div className="h-[6px] w-full overflow-hidden rounded-full bg-[#F3F4F6]">
+                        <div
+                          className="h-full rounded-full"
+                          style={{ width: `${item.pct}%`, backgroundColor: item.color }}
+                        />
+                      </div>
+                    </div>
+                    <p className="w-10 text-right text-[12px] text-[#6B7280]">{item.pctLabel}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+            <div className="flex items-center justify-center">
+              <svg viewBox="0 0 200 200" width="220" height="220">
+                {(() => {
+                  const segments = currentBudgetBreakdown.map((item) => ({
+                    pct: item.pct,
+                    color: item.color,
+                  }));
+                  let cumulative = 0;
+                  return segments.map((seg, i) => {
+                    const start = (cumulative / 100) * 360 - 90;
+                    cumulative += seg.pct;
+                    const end = (cumulative / 100) * 360 - 90;
+                    const r = 80; const cx = 100; const cy = 100;
+                    const toRad = (deg) => (deg * Math.PI) / 180;
+                    const x1 = cx + r * Math.cos(toRad(start));
+                    const y1 = cy + r * Math.sin(toRad(start));
+                    const x2 = cx + r * Math.cos(toRad(end));
+                    const y2 = cy + r * Math.sin(toRad(end));
+                    const large = seg.pct > 50 ? 1 : 0;
+                    return (
+                      <path
+                        key={i}
+                        d={`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z`}
+                        fill={seg.color}
+                        stroke="white"
+                        strokeWidth="2"
+                      />
+                    );
+                  });
+                })()}
+                <circle cx="100" cy="100" r="48" fill="white" />
+                <text x="100" y="95" textAnchor="middle" fontSize="11" fill="#6B7280" fontWeight="600">Cash left</text>
+                <text x="100" y="114" textAnchor="middle" fontSize="18" fill="#0F9D73" fontWeight="800">{formatCurrency(metrics.latestEndingBalance)}</text>
+              </svg>
+            </div>
           </div>
         </section>
 
@@ -688,3 +745,4 @@ function Signals({ setScreen }) {
 }
 
 export default Signals;
+

@@ -31,10 +31,26 @@ export function evaluateCheckoutImpact(data, metrics, selectedOptionLabel = null
     1.5,
   );
   const projectedEndingBalance = Math.round(metrics.latestEndingBalance - upfrontCashImpact);
+  const projectedMonthlySpending =
+    metrics.totalEssentialSpending !== undefined
+      ? metrics.latestSnapshot.essentialSpending +
+        metrics.latestSnapshot.discretionarySpending +
+        (metrics.monthlyBnplRepayments + bnplIncrease)
+      : metrics.monthlySpending + upfrontCashImpact;
+  const projectedSpendingToIncomeRatio = clamp(
+    projectedMonthlySpending / Math.max(metrics.monthlyIncome || 1, 1),
+    0,
+    1.5,
+  );
 
   const projectedMetrics = {
     ...metrics,
     monthlyBnplRepayments: metrics.monthlyBnplRepayments + bnplIncrease,
+    monthlySpending: projectedMonthlySpending,
+    spendingToIncomeRatio: projectedSpendingToIncomeRatio,
+    spendingToIncomeRatioPercent: Math.round(projectedSpendingToIncomeRatio * 100),
+    spendingRatio: projectedSpendingToIncomeRatio,
+    spendingRatioPercent: Math.round(projectedSpendingToIncomeRatio * 100),
     bnplDebtToIncomeRatio: projectedBnplDebtToIncomeRatio,
     bnplDebtToIncomeRatioPercent: Math.round(projectedBnplDebtToIncomeRatio * 100),
     bnplRatio: projectedBnplDebtToIncomeRatio,

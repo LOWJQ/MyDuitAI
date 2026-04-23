@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Checkout from "./screens/Checkout";
 import Forecast from "./screens/Forecast";
 import Overview from "./screens/Overview";
@@ -63,6 +63,11 @@ function SidebarIcon({ icon, active = false }) {
 function App() {
   const [screen, setScreen] = useState("overview");
   const { data, scoreResult, formatCurrency } = getUserFinancialContext();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [screen]);
+
   const scoreTone =
     scoreResult.score >= 80
       ? {

@@ -108,7 +108,7 @@
       .stat {
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
         gap: 12px;
         padding: 13px 14px;
         border: 1px solid var(--line);
@@ -118,6 +118,7 @@
 
       .stat-label {
         margin: 0;
+        max-width: 160px;
         color: var(--muted);
         font-size: 12px;
         line-height: 1.4;
@@ -126,6 +127,7 @@
 
       .stat-value {
         margin: 0;
+        max-width: 110px;
         font-size: 15px;
         line-height: 1.2;
         font-weight: 800;
@@ -154,7 +156,7 @@
         <div class="brand-mark">M</div>
         <div class="brand-copy">
           <h1>MyDuitAI</h1>
-          <p>BNPL guardrails for Shopee Malaysia</p>
+          <p>Buy Now Pay Later guardrails for Shopee Malaysia</p>
         </div>
       </div>
 
@@ -166,12 +168,12 @@
 
       <section class="stats">
         <div class="stat">
-          <p class="stat-label">Active BNPL Plans</p>
+          <p class="stat-label">Active Buy Now Pay Later plans</p>
           <p class="stat-value" id="active-plans">4</p>
         </div>
         <div class="stat">
-          <p class="stat-label">Monthly BNPL burden</p>
-          <p class="stat-value" id="monthly-burden">RM456</p>
+          <p class="stat-label">Monthly Buy Now Pay Later burden</p>
+          <p class="stat-value" id="monthly-burden">RM826</p>
         </div>
       </section>
 

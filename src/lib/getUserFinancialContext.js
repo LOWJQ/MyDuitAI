@@ -131,8 +131,8 @@ export function getUserFinancialContext() {
     forecastProjections: buildForecastProjections(metrics),
     scoreTrendData: buildScoreTrendData(metrics),
     peerComparison: {
-      userRatio: metrics.bnplDebtToIncomeRatio,
-      peerRatio: 22,
+      userRatio: metrics.bnplDebtToIncomeRatioPercent,
+      peerRatio: Number(data.userProfile.peerAverageBnplRatio ?? 14),
     },
     transactions: sortByDateDesc(data.transactions),
     bnplPlans: sortByDateDesc(data.bnplPlans, "nextDueDate"),

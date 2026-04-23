@@ -13,8 +13,6 @@ import RiskDriverList from "../components/RiskDriverList";
 import RiskSummaryCard from "../components/RiskSummaryCard";
 import { generateRiskExplanation } from "../lib/generateRiskExplanation";
 import { getUserFinancialContext } from "../lib/getUserFinancialContext";
-const aiAlertMessage =
-  "AI warning: your score is sliding fast, BNPL load is high, and April cash is down to RM156.";
 
 function CustomScoreTooltip({ active, payload, label }) {
   if (!active || !payload?.length) {
@@ -63,6 +61,7 @@ function Overview({ setScreen }) {
   const [showAlert, setShowAlert] = useState(false);
   const [displayedText, setDisplayedText] = useState("");
   const alertCardRef = useRef(null);
+  const aiAlertMessage = `AI warning: your score is sliding fast, Buy Now Pay Later load is now ${metrics.bnplRatioPercent}% of income, and April cash is down to ${formatCurrency(metrics.latestEndingBalance)}.`;
 
   useEffect(() => {
     const alertNode = alertCardRef.current;
@@ -223,52 +222,37 @@ function Overview({ setScreen }) {
             </div>
           </div>
 
-          <div className="mt-6 grid grid-cols-4 gap-4">
-            <div className="rounded-[22px] border border-[#EEF1F4] bg-[#FBFCFE] px-5 py-4">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">
-                Signals tracked
-              </p>
-              <p className="mt-3 text-[20px] font-semibold text-[#111827]">5 live signals</p>
-              <p className="mt-2 text-[13px] leading-relaxed text-[#6B7280]">
-                Frequency, cash trend, punctuality, debt ratio, and velocity.
-              </p>
-            </div>
-
-            <div className="rounded-[22px] border border-[#EEF1F4] bg-[#FBFCFE] px-5 py-4">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">
-                Baseline learned
-              </p>
-              <p className="mt-3 text-[20px] font-semibold text-[#111827]">
-                {trackedMonths} months of history
-              </p>
-              <p className="mt-2 text-[13px] leading-relaxed text-[#6B7280]">
-                Alerts are based on drift from baseline.
-              </p>
-            </div>
-
-            <div className="rounded-[22px] border border-[#EEF1F4] bg-[#FBFCFE] px-5 py-4">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">
-                Evidence window
-              </p>
-              <p className="mt-3 text-[20px] font-semibold text-[#111827]">
-                {monitoredTransactions} transactions
-              </p>
-              <p className="mt-2 text-[13px] leading-relaxed text-[#6B7280]">
-                One merged view of cash and installments.
-              </p>
-            </div>
-
-            <div className="rounded-[22px] border border-[#F7D7A7] bg-[#FFFBF4] px-5 py-4">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">
-                Protective rule
-              </p>
-              <p className="mt-3 text-[20px] font-semibold text-[#111827]">
-                Critical score triggers friction
-              </p>
-              <p className="mt-2 text-[13px] leading-relaxed text-[#6B7280]">
-                Checkout adds friction when risk worsens.
-              </p>
-            </div>
+          <div className="mt-6 space-y-2">
+            {[
+              { label: "Buy Now Pay Later usage", intensity: 66, status: "Monitored", color: "#1652F0", bg: "#EEF3FD" },
+              { label: "End-of-month balance", intensity: 72, status: "Monitored", color: "#1652F0", bg: "#EEF3FD" },
+              { label: "Repayment punctuality", intensity: 58, status: "Elevated", color: "#B7791F", bg: "#FFFBEB" },
+              { label: "Debt-to-income ratio", intensity: 88, status: "High risk", color: "#C53030", bg: "#FEF2F2" },
+              { label: "Spending velocity", intensity: 84, status: "High risk", color: "#C53030", bg: "#FEF2F2" },
+            ].map((signal) => (
+              <div key={signal.label} className="flex items-center gap-4 rounded-[16px] border border-[#EEF1F4] bg-[#FBFCFE] px-5 py-3">
+                <div className="w-[220px] shrink-0">
+                  <p className="text-[13px] font-semibold leading-snug text-[#111827]">{signal.label}</p>
+                </div>
+                <div className="flex-1">
+                  <div className="h-[8px] w-full overflow-hidden rounded-full bg-[#F3F4F6]">
+                    <div
+                      className="h-full rounded-full"
+                      style={{ width: `${signal.intensity}%`, backgroundColor: signal.color }}
+                    />
+                  </div>
+                </div>
+                <div className="w-[32px] text-right">
+                  <p className="text-[12px] font-semibold text-[#6B7280]">{signal.intensity}</p>
+                </div>
+                <span
+                  className="rounded-full px-3 py-1 text-[11px] font-semibold"
+                  style={{ color: signal.color, backgroundColor: signal.bg }}
+                >
+                  {signal.status}
+                </span>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -471,7 +455,7 @@ function Overview({ setScreen }) {
             <div className="max-w-[560px]">
               <h3 className="text-[20px] font-semibold text-[#111827]">How you compare</h3>
               <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
-                MyDuitAI also checks whether your BNPL burden is drifting above peers with similar
+                MyDuitAI also checks whether your Buy Now Pay Later burden is drifting above peers with similar
                 income.
               </p>
               <p className="mt-4 text-[14px] leading-relaxed text-[#111827]">
@@ -482,30 +466,27 @@ function Overview({ setScreen }) {
               </p>
             </div>
 
-            <div className="grid min-w-[300px] grid-cols-2 gap-4">
-              <div className="rounded-[22px] border border-[#F7C7C7] bg-[#FFF8F8] p-5">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">
-                  Your ratio
-                </p>
-                <p className="mt-2 text-[28px] font-semibold text-[#C53030]">
-                  {peerComparison.userRatio}%
-                </p>
-                <p className="mt-2 text-[13px] leading-relaxed text-[#6B7280]">
-                  Already in the danger range for repayment pressure.
-                </p>
-              </div>
-
-              <div className="rounded-[22px] border border-[#DCE7FF] bg-[#FBFCFE] p-5">
-                <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">
-                  Peer average
-                </p>
-                <p className="mt-2 text-[28px] font-semibold text-[#1652F0]">
-                  {peerComparison.peerRatio}%
-                </p>
-                <p className="mt-2 text-[13px] leading-relaxed text-[#6B7280]">
-                  Typical Buy Now Pay Later burden for similar income users.
-                </p>
-              </div>
+            <div className="min-w-[340px] space-y-4">
+              {[
+                { label: "Your Buy Now Pay Later ratio", value: peerComparison.userRatio, max: 50, color: "#C53030", bg: "#FFF8F8", border: "#F7C7C7" },
+                { label: "Peer average", value: peerComparison.peerRatio, max: 50, color: "#1652F0", bg: "#EEF3FD", border: "#DCE7FF" },
+              ].map((item) => (
+                <div key={item.label} className="rounded-[20px] border px-5 py-4" style={{ backgroundColor: item.bg, borderColor: item.border }}>
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="max-w-[190px] text-[12px] font-semibold uppercase tracking-[0.08em] text-[#6B7280]">{item.label}</p>
+                    <p className="text-[20px] font-semibold" style={{ color: item.color }}>{item.value}%</p>
+                  </div>
+                  <div className="h-[10px] w-full overflow-hidden rounded-full bg-[#F3F4F6]">
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{ width: `${(item.value / item.max) * 100}%`, backgroundColor: item.color }}
+                    />
+                  </div>
+                </div>
+              ))}
+              <p className="px-1 text-[13px] leading-relaxed text-[#6B7280]">
+                You are <span className="font-semibold text-[#C53030]">{peerComparison.userRatio - peerComparison.peerRatio} percentage points</span> above the peer average.
+              </p>
             </div>
           </div>
         </section>
@@ -540,7 +521,10 @@ function Overview({ setScreen }) {
             </span>
             <span className="mx-4 text-[#E5E7EB]">|</span>
             <span>
-              April balance <span className="font-semibold text-[#991B1B]">RM156</span>
+              April balance{" "}
+              <span className="font-semibold text-[#991B1B]">
+                {formatCurrency(metrics.latestEndingBalance)}
+              </span>
             </span>
           </div>
 

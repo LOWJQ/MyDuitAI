@@ -163,16 +163,16 @@ const projectFinancialForecast = (data, metrics) => {
 };
 
 function Forecast({ setScreen }) {
-  const forecastChartData = [
-    { month: "Apr (now)", current: 156, safer: 156 },
-    { month: "May", current: 42, safer: 310 },
-    { month: "Jun", current: -89, safer: 480 },
-    { month: "Jul", current: -201, safer: 620 },
-  ];
-
   const { data, metrics, scoreResult } = getUserFinancialContext();
   const forecast = projectFinancialForecast(data, metrics);
   const current60Day = forecast.currentBehavior.find((item) => item.days === 60);
+  const forecastChartData = [
+    { month: "Apr (now)", current: metrics.latestEndingBalance, safer: metrics.latestEndingBalance },
+    { month: "May", current: forecast.currentBehavior[0]?.projectedRemainingCash ?? metrics.latestEndingBalance, safer: forecast.saferBehavior[0]?.projectedRemainingCash ?? metrics.latestEndingBalance },
+    { month: "Jun", current: forecast.currentBehavior[1]?.projectedRemainingCash ?? metrics.latestEndingBalance, safer: forecast.saferBehavior[1]?.projectedRemainingCash ?? metrics.latestEndingBalance },
+    { month: "Jul", current: forecast.currentBehavior[2]?.projectedRemainingCash ?? metrics.latestEndingBalance, safer: forecast.saferBehavior[2]?.projectedRemainingCash ?? metrics.latestEndingBalance },
+  ];
+  const lastForecastPoint = forecastChartData[forecastChartData.length - 1];
   const pointsToCritical = Math.max(0, scoreResult.score - 40);
   const getNarrativeBorderColor = (line) => {
     const normalizedLine = line.toLowerCase();
@@ -235,7 +235,7 @@ function Forecast({ setScreen }) {
               <span className="font-semibold text-[#C53030]">
                 {formatCurrency(current60Day?.projectedRemainingCash ?? 0)}
               </span>{" "}
-              while BNPL burden stays elevated.
+              while Buy Now Pay Later burden stays elevated.
             </p>
           </div>
         </section>
@@ -247,17 +247,17 @@ function Forecast({ setScreen }) {
                 What happens next - two paths
               </h3>
               <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
-                If nothing changes, cash turns negative by June. Reducing discretionary
-                spending and pausing new BNPL keeps you above zero.
+                If nothing changes, cash turns negative by May. Reducing discretionary
+                spending and pausing new Buy Now Pay Later plans keeps you above zero.
               </p>
             </div>
 
             <div className="flex items-center gap-3">
               <div className="rounded-full border border-[#F7C7C7] bg-[#FFF8F8] px-4 py-2 text-[12px] font-semibold text-[#C53030]">
-                Current path: -RM201 by Jul
+                Current path: {formatCurrency(lastForecastPoint.current)} by Jul
               </div>
               <div className="rounded-full border border-[#D7E8D8] bg-[#F7FCF9] px-4 py-2 text-[12px] font-semibold text-[#0F9D73]">
-                Safer path: +RM620 by Jul
+                Safer path: {formatCurrency(lastForecastPoint.safer)} by Jul
               </div>
             </div>
           </div>
@@ -275,7 +275,7 @@ function Forecast({ setScreen }) {
                 />
                 <YAxis
                   domain={[-250, 700]}
-                  tickFormatter={(value) => `RM${value}`}
+                  tickFormatter={(value) => value < 0 ? `-RM${Math.abs(value)}` : `RM${value}`}
                   axisLine={false}
                   tickLine={false}
                   width={64}
@@ -315,35 +315,56 @@ function Forecast({ setScreen }) {
               Why acting now matters
             </p>
             <p className="mt-2 text-[15px] leading-relaxed text-[#111827]">
-              If Aisha changes course now, she finishes July with RM620 instead of -RM201 - a RM821 difference. The window to act is still open.
+              If Aisha changes course now, she finishes July with {formatCurrency(lastForecastPoint.safer)} instead of {formatCurrency(lastForecastPoint.current)} - a {formatCurrency(lastForecastPoint.safer - lastForecastPoint.current)} difference. The window to act is still open.
             </p>
           </div>
         </section>
 
         <section className="rounded-[28px] border border-[#E6E8EC] bg-white p-8">
-          <h3 className="text-[20px] font-semibold text-[#111827]">Where this is heading</h3>
+          <h3 className="text-[20px] font-semibold text-[#111827]">Monthly cash breakdown - what&apos;s eating the buffer</h3>
           <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
-            Three moments matter most over the next 90 days.
+            Each bar shows one month&apos;s RM3,000 income split into committed costs. The shrinking green slice is what&apos;s left.
           </p>
-          <div className="mt-6 grid grid-cols-3 gap-4">
-            {forecast.currentBehavior.map((item) => (
-              <div
-                key={item.days}
-                className="rounded-[22px] border border-[#EEF1F4] bg-[#FBFCFE] p-5"
-              >
-                <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">
-                  {item.label}
-                </p>
-                <p
-                  className={`mt-3 text-[24px] font-semibold ${
-                    item.projectedRemainingCash < 0 ? "text-[#C53030]" : "text-[#111827]"
-                  }`}
-                >
-                  {formatCurrency(item.projectedRemainingCash)}
-                </p>
-                <p className="mt-2 text-[13px] text-[#6B7280]">
-                  Cash left after bills and BNPL repayments
-                </p>
+          <div className="mt-8 space-y-4">
+            {metrics.snapshots.map((row) => (
+              <div key={row.month} className="flex items-center gap-4">
+                <p className="w-8 shrink-0 text-[13px] font-semibold text-[#6B7280]">{row.month}</p>
+                <div className="flex h-[32px] flex-1 overflow-hidden rounded-[8px]">
+                  <div
+                    className="flex h-full items-center justify-center text-[11px] font-semibold text-white"
+                    style={{ width: `${(row.essentialSpending / 3000) * 100}%`, backgroundColor: "#6366F1" }}
+                    title={`Essential RM${row.essentialSpending}`}
+                  />
+                  <div
+                    className="flex h-full items-center justify-center text-[11px] font-semibold text-white"
+                    style={{ width: `${(row.bnplRepayments / 3000) * 100}%`, backgroundColor: "#C53030" }}
+                    title={`Buy Now Pay Later RM${row.bnplRepayments}`}
+                  />
+                  <div
+                    className="flex h-full items-center justify-center text-[11px] font-semibold text-white"
+                    style={{ width: `${(row.discretionarySpending / 3000) * 100}%`, backgroundColor: "#F59E0B" }}
+                    title={`Discretionary RM${row.discretionarySpending}`}
+                  />
+                  <div
+                    className="flex h-full items-center justify-center text-[11px] font-semibold text-white"
+                    style={{ width: `${(row.endingBalance / 3000) * 100}%`, backgroundColor: "#0F9D73" }}
+                    title={`Remaining RM${row.endingBalance}`}
+                  />
+                </div>
+                <p className={`w-16 text-right text-[13px] font-semibold ${row.endingBalance < 300 ? "text-[#C53030]" : "text-[#0F9D73]"}`}>RM{row.endingBalance}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-5 flex items-center gap-5 flex-wrap">
+            {[
+              { label: "Essential", color: "#6366F1" },
+              { label: "Buy Now Pay Later repayments", color: "#C53030" },
+              { label: "Discretionary", color: "#F59E0B" },
+              { label: "Remaining cash", color: "#0F9D73" },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
+                <p className="text-[12px] text-[#6B7280]">{item.label}</p>
               </div>
             ))}
           </div>

@@ -1,12 +1,12 @@
 const DEFAULT_FINANCIAL_STATE = {
   userName: "Aisha",
-  score: 48,
+  score: 49,
   zone: "Danger",
-  bnplRatio: 38,
-  peerAvgRatio: 22,
-  monthlyBnplBurden: 456,
-  projectedDecemberCash: -10,
-  projectedScore: 41,
+  bnplRatio: 28,
+  peerAvgRatio: 14,
+  monthlyBnplBurden: 826,
+  projectedDecemberCash: -142,
+  projectedScore: 42,
   activePlans: 4,
   monthlyIncome: 3000,
 };

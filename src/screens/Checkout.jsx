@@ -60,9 +60,9 @@ function ScoreHealthBar({ scoreBefore, scoreAfter, zoneBefore, zoneAfter }) {
 
       <div className="mt-5 flex items-center gap-3">
         <span className="rounded-full bg-[#C53030] px-3 py-1 text-[13px] font-semibold text-white">
-          â–¼ {scoreBefore - scoreAfter} points
+          ↓ {scoreBefore - scoreAfter} points
         </span>
-        <span className="text-[13px] text-[#6B7280]">if you proceed with BNPL</span>
+        <span className="text-[13px] text-[#6B7280]">if you proceed with Buy Now Pay Later</span>
       </div>
 
       <div className="mt-4 space-y-1">
@@ -103,8 +103,8 @@ function PeerComparisonChart({ userRatio, peerRatio }) {
       <p className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6B7280]">
         How you compare
       </p>
-      <h3 className="mt-1 text-[16px] font-semibold text-[#111827]">
-        Your BNPL ratio vs peers with similar income
+      <h3 className="mt-1 max-w-[240px] text-[16px] font-semibold leading-snug text-[#111827]">
+        Your Buy Now Pay Later ratio vs peers with similar income
       </h3>
 
       <div className="mt-5 h-[160px]">
@@ -151,7 +151,7 @@ function Checkout({ setScreen }) {
   const [confirmStep, setConfirmStep] = useState(false);
   const [showSupportPath, setShowSupportPath] = useState(false);
   const [showReferralPrep, setShowReferralPrep] = useState(false);
-  const { data, metrics, scoreResult, formatCurrency } = getUserFinancialContext();
+  const { data, metrics, scoreResult, peerComparison, formatCurrency } = getUserFinancialContext();
   const [selectedOptionLabel, setSelectedOptionLabel] = useState(
     data.checkoutScenario.selectedOption,
   );
@@ -248,7 +248,7 @@ function Checkout({ setScreen }) {
           </section>
 
           <div className="grid grid-cols-[minmax(0,420px)_minmax(0,1fr)] gap-8">
-            <section className="coinbase-shell-card px-10 py-10">
+            <section className="rounded-[28px] border border-[#E6E8EC] bg-white px-10 py-10">
               <h3 className="text-[24px] font-semibold text-[#111827]">Purchase summary</h3>
               <p className="mt-3 text-[14px] leading-relaxed text-[#5F6673]">
                 Review the purchase, compare the options, and see exactly how this decision changes
@@ -421,13 +421,13 @@ function Checkout({ setScreen }) {
               />
               <PeerComparisonChart
                 userRatio={checkoutImpact.projectedBnplDebtToIncomeRatio}
-                peerRatio={22}
+                peerRatio={peerComparison.peerRatio}
               />
               <CheckoutInterventionPanel
                 userName={data.userProfile.name}
                 scoreResult={scoreResult}
                 checkoutImpact={checkoutImpact}
-                peerRatio={22}
+                peerRatio={peerComparison.peerRatio}
                 formatCurrency={formatCurrency}
               />
 
@@ -583,7 +583,7 @@ function Checkout({ setScreen }) {
                               </div>
                               <div className="rounded-[16px] border border-[#EEF1F4] bg-[#FBFCFE] p-3">
                                 <p className="text-[11px] uppercase tracking-[0.08em] text-[#9CA3AF]">
-                                  BNPL burden
+                                  Buy Now Pay Later burden
                                 </p>
                                 <p className="mt-2 text-[18px] font-semibold text-[#C53030]">
                                   {checkoutImpact.projectedBnplDebtToIncomeRatio}%

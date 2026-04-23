@@ -8,13 +8,13 @@
 
   const defaultState = {
     userName: "Aisha",
-    score: 48,
+    score: 49,
     zone: "Danger",
-    bnplRatio: 38,
-    peerAvgRatio: 22,
-    monthlyBnplBurden: 456,
-    projectedDecemberCash: -10,
-    projectedScore: 41,
+    bnplRatio: 28,
+    peerAvgRatio: 14,
+    monthlyBnplBurden: 826,
+    projectedDecemberCash: -142,
+    projectedScore: 42,
     activePlans: 4,
     monthlyIncome: 3000,
   };
@@ -396,9 +396,10 @@
 
         .myduitai-peer-label {
           margin: 0 0 10px;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 700;
-          letter-spacing: 0.12em;
+          letter-spacing: 0.1em;
+          line-height: 1.4;
           color: #9CA3AF;
         }
 
@@ -496,8 +497,8 @@
           margin-top: 20px;
           text-align: center;
           color: #9ca3af;
-          font-size: 12px;
-          line-height: 1.5;
+          font-size: 11px;
+          line-height: 1.45;
           font-weight: 600;
         }
 
@@ -601,7 +602,7 @@
           <div class="myduitai-main">
             <div class="myduitai-badge">? MyDuitAI Intervention</div>
             <h1 class="myduitai-title" id="myduitai-title">Wait before you proceed</h1>
-            <p class="myduitai-subtitle">This checkout pattern looks risky based on your current BNPL load and projected cash flow.</p>
+            <p class="myduitai-subtitle">This checkout pattern looks risky based on your current Buy Now Pay Later load and projected cash flow.</p>
 
             <div class="myduitai-hero">
               <div>
@@ -627,11 +628,11 @@
             </div>
 
             <div class="myduitai-callout" style="background:#FFF7D6;border-color:#FDE68A;color:#7C5600;">
-              ? ${escapeHtml(financialState.userName)}, your BNPL is already ${escapeHtml(String(financialState.bnplRatio))}% of your income — peers your age average ${escapeHtml(String(financialState.peerAvgRatio))}%. This purchase leaves you RM${escapeHtml(String(financialState.projectedDecemberCash))} in May.
+              ? ${escapeHtml(financialState.userName)}, your Buy Now Pay Later burden is already ${escapeHtml(String(financialState.bnplRatio))}% of your income - peers your age average ${escapeHtml(String(financialState.peerAvgRatio))}%. This purchase leaves you RM${escapeHtml(String(financialState.projectedDecemberCash))} in May.
             </div>
 
             <div class="myduitai-peer-box">
-              <p class="myduitai-peer-label">YOUR BNPL VS PEERS</p>
+              <p class="myduitai-peer-label">YOUR BUY NOW PAY LATER VS PEERS</p>
               <div class="myduitai-peer-row">
                 <span class="myduitai-peer-name" style="color:#1652F0;">Peer avg</span>
                 <div class="myduitai-peer-track">
@@ -653,7 +654,7 @@
             <button class="myduitai-button myduitai-button-secondary" id="myduitai-forecast-button" type="button">?? See What Happens Next</button>
             <button class="myduitai-link" id="myduitai-proceed-link" type="button">I understand the risk — proceed anyway</button>
             <p class="myduitai-urgency">?? MyDuitAI pauses by default to protect you</p>
-            <p class="myduitai-footer">MyDuitAI · Protecting Malaysian youth from BNPL debt</p>
+            <p class="myduitai-footer">MyDuitAI protects Malaysian youth from Buy Now Pay Later debt.</p>
           </div>
 
           <div class="myduitai-confirm" id="myduitai-confirm-panel">
@@ -665,7 +666,7 @@
                 <button class="myduitai-button myduitai-confirm-proceed" id="myduitai-confirm-proceed" type="button">Confirm</button>
               </div>
             </div>
-            <p class="myduitai-footer">MyDuitAI · Protecting Malaysian youth from BNPL debt</p>
+            <p class="myduitai-footer">MyDuitAI protects Malaysian youth from Buy Now Pay Later debt.</p>
           </div>
         </div>
       </div>
