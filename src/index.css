@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: "Inter", sans-serif;
+  color: #111827;
+  background: #ffffff;
+}
+
+body {
+  margin: 0;
+  min-width: 1280px;
+  background: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.card {
+  @apply rounded-2xl border bg-white p-6;
+  border-color: #eeeff2;
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.02);
+}
+
+.primary-button {
+  @apply rounded-full bg-primary px-6 py-3 font-semibold text-white transition hover:bg-[#0041CC];
+}
+
+.secondary-button {
+  @apply rounded-full border px-6 py-3 font-semibold text-primary transition hover:bg-white;
+  border-color: #0052ff;
+}
+
+.coinbase-shell-card {
+  background: #ffffff;
+  border: 1px solid #E6E8EC;
+  border-radius: 28px;
+}
+
+.coinbase-input {
+  background: #F8F9FB;
+  border: 1px solid #E6E8EC;
+  border-radius: 16px;
+  color: #111827;
+}
+
+.coinbase-input::placeholder {
+  color: #6b7280;
+}
