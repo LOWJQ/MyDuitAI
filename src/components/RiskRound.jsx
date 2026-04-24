@@ -7,7 +7,7 @@ const zoneStyles = {
   Critical: "text-red-700 bg-red-50 border-red-200",
 };
 
-function RiskSummaryCard({ score, zone, summary }) {
+function RiskRound({ score, zone }) {
   const zoneDescriptions = {
     Stable: "Financially stable with healthy room to absorb new commitments.",
     Warning: "Early pressure is building and should be addressed before it compounds.",
@@ -24,23 +24,21 @@ function RiskSummaryCard({ score, zone, summary }) {
       "Right now, the user is close enough to financial distress that protection and support should appear before more debt is added.",
   };
   return (
-    <div className="rounded-[32px] border border-[#E6E8EC] bg-white p-8">
-      <div className="grid grid-cols-[minmax(0,1fr)_320px] items-center gap-8">
-        <div className="flex items-center justify-center rounded-[28px] border border-[#EEF1F4] bg-[#FBFCFE] px-5 py-6">
-          <div className="flex flex-col items-center text-center">
-            <div className="scale-105">
-              <ScoreGauge score={score} />
-            </div>
-            <span
-              className={`mt-4 rounded-full border px-5 py-2.5 text-[15px] font-semibold ${zoneStyles[zone] ?? zoneStyles.Warning}`}
-            >
-              {zone}
-            </span>
+    <div className="h-full rounded-[32px] border border-[#E6E8EC] bg-white p-8">
+      <div className="flex h-full items-center justify-center rounded-[28px] border border-[#EEF1F4] bg-[#FBFCFE] px-5 py-6">
+        <div className="flex flex-col items-center text-center">
+          <div className="scale-105">
+            <ScoreGauge score={score} />
           </div>
+          <span
+            className={`mt-4 rounded-full border px-5 py-2.5 text-[15px] font-semibold ${zoneStyles[zone] ?? zoneStyles.Warning}`}
+          >
+            {zone}
+          </span>
         </div>
       </div>
     </div>
   );
 }
 
-export default RiskSummaryCard;
+export default RiskRound;
