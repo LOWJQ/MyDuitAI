@@ -4,6 +4,7 @@ import Forecast from "./screens/Forecast";
 import Overview from "./screens/Overview";
 import Recovery from "./screens/Recovery";
 import Signals from "./screens/Signals";
+import VoiceCommandEngine from "./components/VoiceCommandEngine";
 import { getUserFinancialContext } from "./lib/getUserFinancialContext";
 
 const sidebarItems = [
@@ -181,7 +182,8 @@ function App() {
           </nav>
 
           <div className="mt-auto">
-            <div className="rounded-[20px] border border-[#EEF1F4] p-3.5">
+            <VoiceCommandEngine setScreen={setScreen} />
+            {/* <div className="rounded-[20px] border border-[#EEF1F4] p-3.5">
               <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[#6B7280]">
                 Current user
               </p>
@@ -195,7 +197,7 @@ function App() {
               <p className="mt-2.5 text-[12px] leading-relaxed text-[#6B7280]">
                 Critical scores can trigger AKPK referral and counselling support.
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
       </aside>
