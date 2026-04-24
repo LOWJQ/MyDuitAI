@@ -13,7 +13,7 @@ const BNPL_DEEP_LINKS = {
 const INTENTS = [
   {
     id: "pay_shopee",
-    patterns: [/shope/i, /shopee/i, /spaylater/i, /s\s?pay/i],
+    patterns: [/shope/i, /shopee/i, /shoppie/i, /spaylater/i, /s\s?pay/i],
     provider: "Shopee PayLater",
     action: "pay",
   },

@@ -27,12 +27,14 @@
   injectFloatingBadge();
   bootObservers();
 
+  let currentBlockedUntil = null;
+
   function loadFinancialState() {
     if (!chrome?.storage?.local) {
       return;
     }
 
-    chrome.storage.local.get([STORAGE_KEY], (result) => {
+    chrome.storage.local.get([STORAGE_KEY, 'bnplBlockedUntil'], (result) => {
       if (chrome.runtime?.lastError) {
         return;
       }
@@ -40,6 +42,64 @@
       if (result[STORAGE_KEY]) {
         financialState = { ...defaultState, ...result[STORAGE_KEY] };
       }
+
+      if (result.bnplBlockedUntil && Date.now() < result.bnplBlockedUntil) {
+        currentBlockedUntil = result.bnplBlockedUntil;
+        enforceBlock();
+      }
+    });
+  }
+
+  function enforceBlock() {
+    if (currentBlockedUntil && Date.now() < currentBlockedUntil) {
+      hideSPayLaterOption(currentBlockedUntil);
+    }
+  }
+
+  function hideSPayLaterOption(blockedUntilTimestamp) {
+    if (!document.body) return;
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT,
+      null,
+      false
+    );
+
+    const targets = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      if (/spaylater|shopee paylater/i.test(node.nodeValue)) {
+        targets.push(node.parentElement);
+      }
+    }
+
+    if (targets.length === 0) return;
+
+    const dateStr = new Date(blockedUntilTimestamp).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+
+    targets.forEach(el => {
+      if (!el || el.closest('#myduitai-overlay-host') || el.closest('#myduitai-floating-badge')) return;
+
+      let target = el;
+      while (target.parentElement && target.parentElement !== document.body && target.parentElement.offsetHeight > 0 && target.parentElement.offsetHeight < 90) {
+        target = target.parentElement;
+      }
+
+      if (target.dataset.myduitaiBlocked) return;
+      target.dataset.myduitaiBlocked = "true";
+
+      target.style.pointerEvents = "none";
+      target.style.opacity = "0.7";
+      target.style.filter = "grayscale(100%)";
+      target.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;padding:12px;background:#F3F4F6;border-radius:8px;color:#4B5563;font-size:13px;font-weight:600;width:100%;box-sizing:border-box;border:1px solid #E5E7EB;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Blocked by MyDuitAI until ${dateStr}</span>
+        </div>
+      `;
     });
   }
 
@@ -62,6 +122,7 @@
     );
 
     const observer = new MutationObserver(() => {
+      enforceBlock();
       maybeTriggerOverlay("dom-mutation");
       refreshBadgeState();
       detectUrlChange();
@@ -244,11 +305,20 @@
         .myduitai-card {
           width: min(100%, 480px);
           max-width: 480px;
+          max-height: 85vh;
+          overflow-y: auto;
+          box-sizing: border-box;
           border-radius: 24px;
           padding: 32px;
           background: #ffffff;
           box-shadow: 0 30px 80px rgba(17, 24, 39, 0.28);
           animation: myduitai-scale-in 220ms ease-out;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        .myduitai-card::-webkit-scrollbar {
+          display: none;
         }
 
         .myduitai-badge {
@@ -598,9 +668,9 @@
         }
       </style>
       <div class="myduitai-backdrop" role="presentation">
-        <div class="myduitai-card" role="dialog" aria-modal="true" aria-labelledby="myduitai-title">
+        <div class="myduitai-card" role="dialog" aria-modal="true" aria-labelledby="myduitai-title" >
           <div class="myduitai-main">
-            <div class="myduitai-badge">? MyDuitAI Intervention</div>
+            <div class="myduitai-badge">MyDuitAI Intervention</div>
             <h1 class="myduitai-title" id="myduitai-title">Wait before you proceed</h1>
             <p class="myduitai-subtitle">This checkout pattern looks risky based on your current Buy Now Pay Later load and projected cash flow.</p>
 
@@ -628,7 +698,7 @@
             </div>
 
             <div class="myduitai-callout" style="background:#FFF7D6;border-color:#FDE68A;color:#7C5600;">
-              ? ${escapeHtml(financialState.userName)}, your Buy Now Pay Later burden is already ${escapeHtml(String(financialState.bnplRatio))}% of your income - peers your age average ${escapeHtml(String(financialState.peerAvgRatio))}%. This purchase leaves you RM${escapeHtml(String(financialState.projectedDecemberCash))} in May.
+              ${escapeHtml(financialState.userName)}, your Buy Now Pay Later burden is already ${escapeHtml(String(financialState.bnplRatio))}% of your income - peers your age average ${escapeHtml(String(financialState.peerAvgRatio))}%. This purchase leaves you RM${escapeHtml(String(financialState.projectedDecemberCash))} in May.
             </div>
 
             <div class="myduitai-peer-box">
@@ -649,11 +719,11 @@
               </div>
             </div>
 
-            <button class="myduitai-button myduitai-button-primary" id="myduitai-pause-button" type="button">? Pause — Think It Over</button>
+            <button class="myduitai-button myduitai-button-primary" id="myduitai-pause-button" type="button"> Block BNPL for 48 hours</button>
             <p class="myduitai-button-caption">Recommended by MyDuitAI · Safer default</p>
-            <button class="myduitai-button myduitai-button-secondary" id="myduitai-forecast-button" type="button">?? See What Happens Next</button>
+            <button class="myduitai-button myduitai-button-secondary" id="myduitai-forecast-button" type="button"> See What Happens Next</button>
             <button class="myduitai-link" id="myduitai-proceed-link" type="button">I understand the risk — proceed anyway</button>
-            <p class="myduitai-urgency">?? MyDuitAI pauses by default to protect you</p>
+            <p class="myduitai-urgency"> MyDuitAI pauses by default to protect you</p>
             <p class="myduitai-footer">MyDuitAI protects Malaysian youth from Buy Now Pay Later debt.</p>
           </div>
 
@@ -678,8 +748,13 @@
     const confirmPanel = shadow.getElementById("myduitai-confirm-panel");
 
     shadow.getElementById("myduitai-pause-button")?.addEventListener("click", () => {
-      closeOverlay();
-      showToast("Good call. Come back tomorrow with a clear head.");
+      const blockedUntil = Date.now() + (48 * 60 * 60 * 1000);
+      chrome.storage.local.set({ bnplBlockedUntil: blockedUntil }, () => {
+        currentBlockedUntil = blockedUntil;
+        closeOverlay();
+        showToast("BNPL blocked for 48 hours. Good call.");
+        enforceBlock();
+      });
     });
 
     shadow.getElementById("myduitai-forecast-button")?.addEventListener("click", () => {
