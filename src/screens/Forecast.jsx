@@ -463,7 +463,8 @@ function Forecast({ setScreen }) {
         show={hasAnalysed && contentVisible}
         label="Your financial trajectory is critical. The AI has triggered an intervention."
         buttonText="See the Intervention →"
-        onClick={() => setScreen("checkout")}
+        question="Why does my forecast look like this?"
+        fallback="Aisha, three payments - Atome RM220, Grab PayLater RM180, and Shopee PayLater RM260 - all land between May 5th and 11th. Your salary only arrives on the 25th. That 20-day gap is what collapses your cash in May. If nothing changes, June looks worse."
       />
     </div>
   );

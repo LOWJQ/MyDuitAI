@@ -806,7 +806,8 @@ function Signals({ setScreen }) {
         show={hasAnalysed && contentVisible}
         label="4 risk signals identified across your transaction history. See where this leads."
         buttonText="See Where This Leads →"
-        onClick={() => setScreen("forecast")}
+        question="What are the four risk signals MyDuitAI sees on this page?"
+        fallback="Aisha, MyDuitAI sees four pressure points building together. Your BNPL repayments are clustering early in the month, your month-end cash has shrunk to RM24, your BNPL burden is already 28 percent of income, and recent spending is landing before your May 25 salary. That combination is why your score keeps weakening."
       />
     </div>
   );

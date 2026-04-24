@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import NextStepBar from "../components/NextStepBar";
 
 const recoveryState = { completed: false, response: null };
 
@@ -29,7 +30,7 @@ USER PROFILE:
 
 ACTIVE BNPL PLANS:
 1. Atome - Workwear capsule refresh - RM220/month - 3 installments remaining - due 5th of each month
-2. Shopee PayLater - Desk chair and room storage - RM260/month - 2 installments remaining - due 11th of each month  
+2. Shopee PayLater - Desk chair and room storage - RM260/month - 2 installments remaining - due 11th of each month
 3. Grab PayLater - Concert ticket - RM180/month - 1 installment remaining - due 9th of each month
 4. SPayLater - Samsung Galaxy Buds Pro - RM166/month - 3 installments remaining - due 11th of each month (DO NOT PROCEED - intervention active)
 
@@ -97,7 +98,6 @@ function Recovery() {
         const doneTimer = window.setTimeout(() => {
           setAnimationDone(true);
         }, 600);
-
         interval._doneTimer = doneTimer;
         return;
       }
@@ -149,7 +149,7 @@ function Recovery() {
 
   const formattedResponse = useMemo(() => {
     return responseText.split("\n").map((line, index) => {
-      const trimmed = line.trim();
+      const trimmed = line.trim().replace(/â€¢/g, "•").replace(/âœ“/g, "✓");
 
       if (!trimmed) {
         return <div key={`empty-${index}`} className="mb-3" />;
@@ -319,8 +319,8 @@ function Recovery() {
     const progressWidth = requestDone
       ? 100
       : hasFinishedLines
-        ? 92
-        : (visibleCount / recoveryLines.length) * 92;
+        ? 84
+        : (visibleCount / recoveryLines.length) * 84;
 
     return (
       <div className="min-h-[calc(100vh-84px)] bg-[#FCFCFD] px-8 py-7">
@@ -364,7 +364,9 @@ function Recovery() {
 
             <div className="mt-6 h-[6px] overflow-hidden rounded-full bg-[#EEF1F4]">
               <div
-                className="h-full rounded-full bg-[#1652F0] transition-all duration-500"
+                className={`h-full rounded-full transition-all duration-500 ${
+                  hasFinishedLines && !requestDone ? "bg-[#3B82F6]" : "bg-[#1652F0]"
+                }`}
                 style={{ width: `${progressWidth}%` }}
               />
             </div>
@@ -469,6 +471,14 @@ function Recovery() {
           {formattedResponse}
         </div>
       </div>
+
+      <NextStepBar
+        show={resultsVisible}
+        label="Hear the recovery plan MyDuitAI prepared for this month-by-month roadmap."
+        buttonText="Hear What I Should Do First"
+        question="What should I do first?"
+        fallback="Aisha, clearing the Grab PayLater plan first makes the most sense. It ends in one payment and frees up RM180 every month immediately. That breathing room helps break the cycle. Focus there first, then let the Shopee PayLater and Atome plans step down without opening anything new."
+      />
     </div>
   );
 }

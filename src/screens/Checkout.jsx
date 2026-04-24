@@ -118,7 +118,8 @@ function Checkout({ setScreen }) {
         show
         label="The AI has prepared a personalised recovery plan for you."
         buttonText="View Recovery Plan →"
-        onClick={() => setScreen("recovery")}
+        question="Why is MyDuitAI intervening right now?"
+        fallback="Aisha, your BNPL is already at 28 percent of your income, double what your peers carry. Adding another purchase pushes your projected May balance to negative RM142. Your stress score can fall from 49 to 31. MyDuitAI intervenes here because this purchase moment is where the risk becomes real."
       />
     </div>
   );

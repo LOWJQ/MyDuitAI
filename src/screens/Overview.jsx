@@ -98,9 +98,30 @@ function Overview({ setScreen }) {
   }, []);
 
   useEffect(() => {
+    if (showAlert || !hasAnalysed || !contentVisible) {
+      return undefined;
+    }
+
     const alertNode = alertCardRef.current;
 
-    if (!alertNode || showAlert) {
+    if (!alertNode) {
+      return undefined;
+    }
+
+    const maybeShowAlert = () => {
+      const rect = alertNode.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      const isVisible = rect.top <= viewportHeight * 0.8 && rect.bottom >= viewportHeight * 0.2;
+
+      if (isVisible) {
+        setShowAlert(true);
+        return true;
+      }
+
+      return false;
+    };
+
+    if (maybeShowAlert()) {
       return undefined;
     }
 
@@ -113,15 +134,25 @@ function Overview({ setScreen }) {
           observer.disconnect();
         }
       },
-      { threshold: 0.3 },
+      { threshold: 0.08, rootMargin: "0px 0px -12% 0px" },
     );
 
     observer.observe(alertNode);
 
+    const handleScroll = () => {
+      if (maybeShowAlert()) {
+        observer.disconnect();
+        window.removeEventListener("scroll", handleScroll);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
     return () => {
       observer.disconnect();
+      window.removeEventListener("scroll", handleScroll);
     };
-  }, [showAlert]);
+  }, [showAlert, hasAnalysed, contentVisible]);
 
   useEffect(() => {
     if (!showAlert) {
@@ -667,9 +698,10 @@ function Overview({ setScreen }) {
       ) : null}
       <NextStepBar
         show={hasAnalysed && contentVisible}
-        label="The AI has calculated your Financial Stress Score. See what signals are driving it."
+        label="Hear MyDuitAI explain why your score is dropping right now."
         buttonText="See What We See →"
-        onClick={() => setScreen("signals")}
+        question="Why is my score dropping?"
+        fallback="Aisha, your score dropped 18 points in three weeks because your BNPL commitments grew faster than your income. You now have four active plans taking up 28 percent of your salary. Your end of month balance is down to RM24. The pattern is accelerating, and MyDuitAI caught it before it became a crisis."
       />
     </div>
   );
