@@ -11,10 +11,9 @@ const normalizeRatio = (value) => {
 };
 
 const getZone = (score) => {
-  if (score >= 80) return "Stable";
-  if (score >= 60) return "Warning";
-  if (score >= 40) return "Danger";
-  return "Critical";
+  if (score >= 60) return "Healthy";
+  if (score >= 40) return "Warning";
+  return "Intervention";
 };
 
 const formatRatio = (value) => `${Math.round(normalizeRatio(value) * 100)}%`;
@@ -91,7 +90,9 @@ export function calculateFinancialStressScore(metrics = {}) {
   }
 
   let bnplRatioPenalty = 0;
-  if (normalizedBnplRatio >= 0.3) {
+  if (normalizedBnplRatio >= 0.35) {
+    bnplRatioPenalty = 16;
+  } else if (normalizedBnplRatio >= 0.3) {
     bnplRatioPenalty = 14;
   } else if (normalizedBnplRatio >= 0.2) {
     bnplRatioPenalty = 10;
@@ -116,7 +117,7 @@ export function calculateFinancialStressScore(metrics = {}) {
   if (normalizedSpendingRatio >= 1) {
     spendingPenalty = 12;
   } else if (normalizedSpendingRatio >= 0.92) {
-    spendingPenalty = 9;
+    spendingPenalty = 12;
   } else if (normalizedSpendingRatio >= 0.85) {
     spendingPenalty = 6;
   } else if (normalizedSpendingRatio >= 0.78) {
@@ -142,13 +143,11 @@ export function calculateFinancialStressScore(metrics = {}) {
     zone,
     contributors,
     summary:
-      finalScore >= 80
-        ? "Your finances look stable with enough room to absorb upcoming commitments."
-        : finalScore >= 60
-          ? "Some financial pressure is building, but there is still room to stabilise before it worsens."
-          : finalScore >= 40
-            ? "Your finances are under growing strain. Lower cash buffers and rising repayments are starting to overlap."
-            : "Your finances are in a critical zone. Immediate action is needed to prevent missed obligations or cash shortfall.",
+      finalScore >= 60
+        ? "Your finances look healthy, with enough room to absorb upcoming commitments."
+        : finalScore >= 40
+          ? "Your finances are showing warning signs. Lower cash buffers and rising repayments are starting to overlap."
+          : "Your finances have reached the intervention zone. Protective action is needed before more debt is added.",
   };
 }
 

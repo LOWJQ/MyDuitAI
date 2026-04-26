@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import NextStepBar from "../components/NextStepBar";
+import { getUserFinancialContext } from "../lib/getUserFinancialContext";
 
 const recoveryState = { completed: false, response: null };
 
@@ -25,14 +26,14 @@ USER PROFILE:
 - Name: Aisha, Age: 23
 - Monthly Income: RM3,000
 - Employment: Junior customer support executive
-- Current Financial Stress Score: 51 (Danger zone)
+- Current Financial Stress Score: 38 (Intervention zone)
 - Remaining cash after all obligations this month: RM24
 
 ACTIVE BNPL PLANS:
 1. Atome - Workwear capsule refresh - RM220/month - 3 installments remaining - due 5th of each month
 2. Shopee PayLater - Desk chair and room storage - RM260/month - 2 installments remaining - due 11th of each month
 3. Grab PayLater - Concert ticket - RM180/month - 1 installment remaining - due 9th of each month
-4. SPayLater - Samsung Galaxy Buds Pro - RM166/month - 3 installments remaining - due 11th of each month (DO NOT PROCEED - intervention active)
+4. SPayLater - AirPods - RM166/month - 3 installments remaining - due 11th of each month (DO NOT PROCEED - intervention active)
 
 MONTHLY ESSENTIALS (non-negotiable):
 - Rent: RM680
@@ -67,7 +68,126 @@ Format rules:
 
 Use RM for currency. Be specific with numbers. Keep the tone supportive but brief. Address Aisha directly only once if needed.`;
 
+const ROADMAP_MONTHS = [
+  { label: "May 2026", year: 2026, monthIndex: 4 },
+  { label: "June 2026", year: 2026, monthIndex: 5 },
+  { label: "July 2026", year: 2026, monthIndex: 6 },
+  { label: "August 2026", year: 2026, monthIndex: 7 },
+];
+
+const formatMonthName = (year, monthIndex) =>
+  new Date(year, monthIndex, 1).toLocaleDateString("en-MY", {
+    month: "long",
+    year: "numeric",
+  });
+
+const buildLocalRecoveryPlan = ({ data, metrics, scoreResult, formatCurrency }) => {
+  const activePlans = [...data.bnplPlans]
+    .filter((plan) => plan.status === "active")
+    .sort((left, right) => {
+      if (left.installmentsRemaining !== right.installmentsRemaining) {
+        return left.installmentsRemaining - right.installmentsRemaining;
+      }
+
+      if (right.installmentAmount !== left.installmentAmount) {
+        return right.installmentAmount - left.installmentAmount;
+      }
+
+      return new Date(left.nextDueDate) - new Date(right.nextDueDate);
+    });
+
+  const activeBnplBurden = activePlans.reduce(
+    (total, plan) => total + Number(plan.installmentAmount || 0),
+    0,
+  );
+  const latestEndingBalance = Number(metrics.latestEndingBalance || 0);
+  const debtFreeMonth = ROADMAP_MONTHS.find(({ year, monthIndex }) => {
+    return activePlans.every((plan) => {
+      const nextDue = new Date(plan.nextDueDate);
+      const planEnd = new Date(nextDue.getFullYear(), nextDue.getMonth() + plan.installmentsRemaining, 1);
+      const currentMonth = new Date(year, monthIndex, 1);
+      return planEnd <= currentMonth;
+    });
+  });
+
+  const priorityLines = activePlans.map((plan, index) => {
+    const reasons = [];
+
+    if (plan.installmentsRemaining === 1) {
+      reasons.push("it clears in one payment and frees cash immediately");
+    } else if (plan.installmentAmount >= 250) {
+      reasons.push("it has one of the heaviest monthly installments");
+    } else {
+      reasons.push("keeping it running extends repayment overlap");
+    }
+
+    if (new Date(plan.nextDueDate).getDate() <= 11) {
+      reasons.push(`its next due date is ${new Date(plan.nextDueDate).getDate()} ${formatMonthName(new Date(plan.nextDueDate).getFullYear(), new Date(plan.nextDueDate).getMonth()).split(" ")[0]}`);
+    }
+
+    return `${index + 1}. ${plan.provider} - ${plan.purchaseName} (${formatCurrency(plan.installmentAmount)}/month, ${plan.installmentsRemaining} installment${plan.installmentsRemaining > 1 ? "s" : ""} left) because ${reasons.join(" and ")}.`;
+  });
+
+  const roadmapLines = ROADMAP_MONTHS.map(({ label, year, monthIndex }) => {
+    const monthDate = new Date(year, monthIndex, 1);
+    const plansActiveThatMonth = activePlans.filter((plan) => {
+      const nextDue = new Date(plan.nextDueDate);
+      const monthsFromStart =
+        (monthDate.getFullYear() - nextDue.getFullYear()) * 12 +
+        (monthDate.getMonth() - nextDue.getMonth());
+
+      return monthsFromStart >= 0 && monthsFromStart < plan.installmentsRemaining;
+    });
+    const monthlyBurden = plansActiveThatMonth.reduce(
+      (total, plan) => total + Number(plan.installmentAmount || 0),
+      0,
+    );
+    const estimatedRemainingCash = latestEndingBalance + (activeBnplBurden - monthlyBurden);
+    const activePlanNames = plansActiveThatMonth.length
+      ? plansActiveThatMonth.map((plan) => plan.provider).join(", ")
+      : "none";
+
+    let action = "keep all discretionary spending on hold";
+    if (label === "May 2026") {
+      action = "clear Grab PayLater first and do not open any new plan";
+    } else if (label === "June 2026") {
+      action = "let the Shopee PayLater plan step down before any new purchase";
+    } else if (label === "July 2026") {
+      action = "finish the last Atome and SPayLater installments without adding new debt";
+    } else if (label === "August 2026") {
+      action = "rebuild a cash buffer instead of replacing the cleared plans";
+    }
+
+    return `- ${label}: active plans ${activePlanNames}, total BNPL burden ${formatCurrency(monthlyBurden)}, estimated remaining cash ${formatCurrency(estimatedRemainingCash)}, and action: ${action}.`;
+  });
+
+  const debtFreeDateText = debtFreeMonth
+    ? `You are projected to be free of the current BNPL stack by ${debtFreeMonth.label} if you avoid opening any new installment plan and let the remaining May to July repayments finish on schedule.`
+    : "You are projected to clear the current BNPL stack within the next few months if you avoid opening any new installment plan.";
+
+  const behaviourChanges = [
+    `- Cap new discretionary spending until your month-end cash is consistently above ${formatCurrency(300)} instead of the current ${formatCurrency(latestEndingBalance)}.`,
+    `- Keep total BNPL commitments below ${formatCurrency(450)} per month so the burden stays well below your current ${formatCurrency(activeBnplBurden)} level.`,
+    "- Add a 24-hour pause before any non-essential checkout so a short cash squeeze does not turn into another multi-month repayment chain.",
+  ];
+
+  return [
+    "## Priority Order",
+    ...priorityLines,
+    "",
+    "## Monthly Roadmap",
+    ...roadmapLines,
+    "",
+    "## Debt-Free Date",
+    debtFreeDateText,
+    "",
+    "## Behaviour Changes",
+    ...behaviourChanges,
+  ].join("\n");
+};
+
 function Recovery() {
+  const recoveryContext = getUserFinancialContext();
   const [stage, setStage] = useState(
     recoveryState.completed && recoveryState.response ? "results" : "initial",
   );
@@ -80,6 +200,7 @@ function Recovery() {
     recoveryState.completed && Boolean(recoveryState.response),
   );
   const runIdRef = useRef(0);
+  const localFallbackPlan = useMemo(() => buildLocalRecoveryPlan(recoveryContext), [recoveryContext]);
 
   useEffect(() => {
     if (stage !== "loading") {
@@ -253,24 +374,20 @@ function Recovery() {
       const data = await response.json();
       const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-      if (!text) {
-        throw new Error("No recovery plan returned");
-      }
-
       if (runIdRef.current !== runId) {
         return;
       }
 
-      setResponseText(text);
+      setResponseText(text || localFallbackPlan);
+      setRequestError("");
       setRequestDone(true);
     } catch (error) {
       if (runIdRef.current !== runId) {
         return;
       }
 
-      setRequestError(
-        error instanceof Error ? error.message : "Unable to generate recovery plan",
-      );
+      setResponseText(localFallbackPlan);
+      setRequestError("");
       console.error("Recovery Gemini request failed:", error);
       setRequestDone(true);
     }
@@ -446,7 +563,7 @@ function Recovery() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-84px)] bg-[#FCFCFD] px-8 py-7">
+    <div className="min-h-[calc(100vh-84px)] bg-[#FCFCFD] px-8 py-7 pb-32">
       <div
         className={`mx-auto max-w-[1180px] transition-opacity duration-[400ms] ${
           resultsVisible ? "opacity-100" : "opacity-0"

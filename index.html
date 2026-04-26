@@ -3,16 +3,899 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="MyDuitAI is an AI-powered financial wellbeing platform built to protect Malaysian youth from financial stress before it becomes collapse."
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
       rel="stylesheet"
     />
-    <title>MyDuitAI</title>
+    <title>MyDuitAI | Financial Wellbeing AI</title>
+    <style>
+      :root {
+        --bg: #000000;
+        --surface: #0f0f0f;
+        --border: #1a1a1a;
+        --accent: #e63946;
+        --text: #ffffff;
+        --muted: #555555;
+        --soft: #a3a3a3;
+        --radius: 12px;
+        --max: 1180px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Poppins", system-ui, sans-serif;
+        font-weight: 400;
+        letter-spacing: 0;
+        overflow-x: hidden;
+      }
+
+      body::selection {
+        background: var(--accent);
+        color: var(--text);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 20;
+        width: 100%;
+        border-bottom: 1px solid rgba(26, 26, 26, 0.86);
+        background: rgba(0, 0, 0, 0.78);
+        backdrop-filter: blur(18px);
+        transform: translateY(-100%);
+        animation: navDrop 720ms cubic-bezier(0.22, 1, 0.36, 1) 160ms forwards;
+      }
+
+      .nav__inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: min(100% - 40px, var(--max));
+        min-height: 64px;
+        margin: 0 auto;
+      }
+
+      .wordmark {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .wordmark__text {
+        color: var(--text);
+        font-size: 1rem;
+        font-weight: 700;
+      }
+
+      .nav__right {
+        display: flex;
+        align-items: center;
+        gap: 26px;
+      }
+
+      .nav__links {
+        display: flex;
+        align-items: center;
+        gap: 26px;
+        color: var(--soft);
+        font-size: 0.9rem;
+        font-weight: 400;
+      }
+
+      .nav__links a {
+        transition: color 180ms ease;
+      }
+
+      .nav__links a:hover {
+        color: var(--text);
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 46px;
+        padding: 0 22px;
+        border: 1px solid rgba(230, 57, 70, 0.62);
+        border-radius: 999px;
+        background: var(--accent);
+        color: var(--text);
+        font-size: 0.9rem;
+        font-weight: 600;
+        white-space: nowrap;
+        box-shadow: 0 0 0 1px rgba(230, 57, 70, 0.16), 0 18px 46px rgba(230, 57, 70, 0.18);
+        transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+      }
+
+      .pill:hover {
+        transform: translateY(-2px);
+        background: #f14350;
+        box-shadow: 0 0 0 1px rgba(230, 57, 70, 0.2), 0 24px 58px rgba(230, 57, 70, 0.26);
+      }
+
+      .hero {
+        position: relative;
+        isolation: isolate;
+        display: flex;
+        align-items: center;
+        min-height: 100svh;
+        padding: 132px 20px 108px;
+        background: #000000;
+        overflow: hidden;
+      }
+
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        background-image: url("hero.jpg");
+        background-size: cover;
+        background-position: center;
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        background: linear-gradient(
+          to bottom,
+          rgba(0,0,0,0.75) 0%,
+          rgba(0,0,0,0.85) 100%
+        );
+        border-bottom: 1px solid var(--border);
+        pointer-events: none;
+      }
+
+      .hero__inner {
+        position: relative;
+        z-index: 3;
+        width: min(100%, var(--max));
+        margin: 0 auto;
+      }
+
+      .hero__content {
+        max-width: 980px;
+        margin: 0 auto;
+        text-align: center;
+        transform: translate3d(var(--px, 0), var(--py, 0), 0);
+        transition: transform 260ms ease-out;
+      }
+
+      .kicker,
+      .eyebrow {
+        color: var(--muted);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .hero .kicker {
+        margin: 0 0 18px;
+      }
+
+      .hero h1 {
+        min-height: 3.45em;
+        max-width: 760px;
+        margin: 0 auto 1.5rem;
+        color: var(--text);
+        font-size: clamp(2rem, 4vw, 3.5rem);
+        font-weight: 700;
+        line-height: 1.15;
+        letter-spacing: 0;
+      }
+
+      .typewriter {
+        display: inline;
+      }
+
+      .cursor {
+        display: inline-block;
+        width: 0.08em;
+        height: 0.88em;
+        margin-left: 0.08em;
+        background: var(--accent);
+        transform: translateY(0.09em);
+        animation: blink 820ms steps(2, start) infinite;
+      }
+
+      .hero__subtitle {
+        max-width: 480px;
+        margin: 0 auto;
+        color: #666;
+        font-size: 1rem;
+        font-weight: 300;
+        line-height: 1.62;
+      }
+
+      .hero__actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 18px;
+        margin-top: 28px;
+      }
+
+      .hero__note {
+        margin: 14px 0 0;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .fade-up {
+        opacity: 0;
+        transform: translateY(18px);
+        animation: fadeUp 720ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+
+      .delay-1 {
+        animation-delay: 420ms;
+      }
+
+      .delay-2 {
+        animation-delay: 4050ms;
+      }
+
+      .delay-3 {
+        animation-delay: 4220ms;
+      }
+
+      .delay-4 {
+        animation-delay: 4380ms;
+      }
+
+      .trusted {
+        border-bottom: 1px solid var(--border);
+        background: #030303;
+        padding: 24px 20px;
+      }
+
+      .trusted__inner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+        width: min(100%, var(--max));
+        margin: 0 auto;
+        text-align: center;
+      }
+
+      .trusted__label {
+        flex: 0 0 auto;
+        color: var(--muted);
+        font-size: 0.74rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .trusted__badges {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 34px;
+        padding: 0 14px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--surface);
+        color: #d6d6d6;
+        font-size: 0.78rem;
+      }
+
+      main {
+        background: var(--bg);
+      }
+
+      .section {
+        padding: 116px 20px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .section__inner {
+        width: min(100%, var(--max));
+        margin: 0 auto;
+        text-align: center;
+      }
+
+      .section h2 {
+        max-width: 780px;
+        margin: 12px auto 42px;
+        font-size: clamp(2.1rem, 5vw, 4.65rem);
+        font-weight: 700;
+        line-height: 1.02;
+        letter-spacing: 0;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .card {
+        position: relative;
+        min-height: 246px;
+        padding: 28px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+        overflow: hidden;
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--accent);
+        opacity: 0;
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: opacity 420ms ease, transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .card:hover::before,
+      .card.is-visible::before {
+        opacity: 1;
+        transform: scaleX(1);
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(28px);
+        transition: opacity 720ms cubic-bezier(0.22, 1, 0.36, 1), transform 720ms cubic-bezier(0.22, 1, 0.36, 1);
+        transition-delay: var(--stagger, 0ms);
+      }
+
+      .reveal.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .stat-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .icon {
+        width: 42px;
+        height: 42px;
+        color: var(--accent);
+      }
+
+      .stat-card__value {
+        display: block;
+        margin-top: 34px;
+        color: var(--text);
+        font-size: clamp(2.35rem, 5vw, 4.4rem);
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      .stat-card__copy {
+        max-width: 270px;
+        margin: 18px auto 0;
+        color: #a7a7a7;
+        font-size: 0.98rem;
+        line-height: 1.68;
+      }
+
+      .step-card {
+        min-height: 300px;
+      }
+
+      .step-card__number {
+        color: var(--accent);
+        font-size: 0.88rem;
+        font-weight: 700;
+      }
+
+      .step-card h3 {
+        margin: 42px 0 18px;
+        font-size: 1.45rem;
+        line-height: 1.1;
+      }
+
+      .step-card p {
+        margin: 0;
+        color: #a7a7a7;
+        font-size: 0.95rem;
+        line-height: 1.78;
+      }
+
+      .quote-section {
+        padding-bottom: 126px;
+      }
+
+      .quote {
+        max-width: 970px;
+        margin: 0 auto;
+        color: var(--text);
+        font-size: clamp(1.45rem, 3vw, 2.75rem);
+        font-style: italic;
+        font-weight: 300;
+        line-height: 1.28;
+        text-align: center;
+      }
+
+      .quote + p {
+        margin: 28px 0 0;
+        color: var(--muted);
+        font-size: 0.96rem;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      .footer {
+        padding: 34px 20px;
+        background: #030303;
+      }
+
+      .footer__inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        width: min(100%, var(--max));
+        margin: 0 auto;
+      }
+
+      .footer__links {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 22px;
+        color: #9c9c9c;
+        font-size: 0.86rem;
+      }
+
+      .footer__links a:hover {
+        color: var(--text);
+      }
+
+      .copyright {
+        color: var(--muted);
+        font-size: 0.84rem;
+      }
+
+      @keyframes navDrop {
+        to {
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      @media (max-width: 860px) {
+        .nav__inner {
+          width: min(100% - 28px, var(--max));
+          min-height: 64px;
+        }
+
+        .nav__links {
+          display: none;
+        }
+
+        .nav__right {
+          gap: 0;
+        }
+
+        .nav .pill {
+          min-height: 40px;
+          padding: 0 16px;
+          font-size: 0.78rem;
+        }
+
+        .hero {
+          min-height: auto;
+          padding: 120px 16px 86px;
+        }
+
+        .hero h1 {
+          min-height: 4.6em;
+          font-size: clamp(2rem, 4vw, 3.5rem);
+        }
+
+        .hero__actions .pill {
+          width: 100%;
+          min-height: 52px;
+        }
+
+        .trusted {
+          padding: 22px 16px;
+        }
+
+        .trusted__inner {
+          align-items: center;
+          flex-direction: column;
+        }
+
+        .section {
+          padding: 82px 16px;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .card {
+          min-height: 220px;
+          padding: 24px;
+        }
+
+        .step-card {
+          min-height: 260px;
+        }
+
+        .footer__inner {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
+
+      @media (max-width: 430px) {
+        .wordmark {
+          font-size: 1rem;
+        }
+
+        .nav .pill {
+          padding: 0 13px;
+        }
+
+        .kicker,
+        .eyebrow,
+        .trusted__label {
+          font-size: 0.68rem;
+          line-height: 1.6;
+        }
+
+        .hero h1 {
+          font-size: clamp(2rem, 4vw, 3.5rem);
+        }
+
+        .section h2,
+        .quote {
+          overflow-wrap: anywhere;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 1ms !important;
+          animation-iteration-count: 1 !important;
+          scroll-behavior: auto !important;
+          transition-duration: 1ms !important;
+        }
+
+        .nav,
+        .fade-up,
+        .reveal {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+
+        .hero__content {
+          transform: none !important;
+        }
+
+        .cursor {
+          display: none;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <header class="nav" aria-label="Main navigation">
+      <div class="nav__inner">
+        <a class="wordmark" href="#">
+          <img src="logo.png" alt="MyDuitAI" style="height: 52px; width: auto; object-fit: contain; mix-blend-mode: screen;">
+          <span class="wordmark__text">MyDuitAI</span>
+        </a>
+        <div class="nav__right">
+          <nav class="nav__links" aria-label="Page sections">
+            <a href="#how-it-works">How It Works</a>
+            <a href="#impact">Impact</a>
+          </nav>
+          <a class="pill" href="dashboard.html">Get Started →</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero__inner">
+          <div class="hero__content" data-parallax>
+            <p class="kicker fade-up delay-1">AI-Powered · Financial Wellbeing · Built for Malaysian Youth</p>
+            <h1 id="hero-title" aria-label="The AI That Protects Malaysian Youth From Financial Collapse">
+              <span class="typewriter" data-typewriter="The AI That Protects Malaysian Youth From Financial Collapse"></span><span class="cursor" aria-hidden="true"></span>
+            </h1>
+            <p class="hero__subtitle fade-up delay-2">
+              Banks use AI to predict if you'll default — to protect themselves. MyDuitAI builds the same engine. To protect you.
+            </p>
+            <div class="hero__actions fade-up delay-3">
+              <a class="pill" href="dashboard.html">See How It Works →</a>
+            </div>
+            <p class="hero__note fade-up delay-4">Free for users · Powered by Open Finance</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="trusted" aria-label="Powered by">
+        <div class="trusted__inner">
+          <div class="trusted__label">Powered By</div>
+          <div class="trusted__badges">
+            <span class="badge">Bank Negara Open Finance</span>
+            <span class="badge">PayNet</span>
+            <span class="badge">AKPK</span>
+            <span class="badge">Consumer Credit Act 2025</span>
+            <span class="badge">Predictive AI</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="how-it-works" aria-labelledby="problem-title">
+        <div class="section__inner">
+          <p class="eyebrow reveal">The Problem</p>
+          <h2 id="problem-title" class="reveal">The Crisis No One Is Talking About</h2>
+          <div class="grid" data-stagger-group>
+            <article class="card stat-card reveal">
+              <svg class="icon" viewBox="0 0 48 48" role="img" aria-label="Warning triangle">
+                <path d="M24 5 45 42H3L24 5Z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" />
+                <path d="M24 17v12" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" />
+                <path d="M24 35h.01" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+              </svg>
+              <div>
+                <span class="stat-card__value" data-count-to="53000" data-format="number">0</span>
+                <p class="stat-card__copy">Malaysians under 30 carrying RM1.9B in debt</p>
+              </div>
+            </article>
+
+            <article class="card stat-card reveal">
+              <svg class="icon" viewBox="0 0 48 48" role="img" aria-label="Person">
+                <circle cx="24" cy="15" r="8" fill="none" stroke="currentColor" stroke-width="2.6" />
+                <path d="M9 43c2.5-9 8-14 15-14s12.5 5 15 14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" />
+              </svg>
+              <div>
+                <span class="stat-card__value" data-count-to="26" data-format="percent">0%</span>
+                <p class="stat-card__copy">of all bankruptcies in Malaysia are below age 34</p>
+              </div>
+            </article>
+
+            <article class="card stat-card reveal">
+              <svg class="icon" viewBox="0 0 48 48" role="img" aria-label="Credit card">
+                <rect x="6" y="12" width="36" height="25" rx="4" fill="none" stroke="currentColor" stroke-width="2.6" />
+                <path d="M6 20h36" stroke="currentColor" stroke-width="2.6" />
+                <path d="M13 30h8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" />
+              </svg>
+              <div>
+                <span class="stat-card__value" data-count-to="9.3" data-format="currency">RM0B</span>
+                <p class="stat-card__copy">in BNPL transactions in just the first half of 2025</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="works-title">
+        <div class="section__inner">
+          <p class="eyebrow reveal">How It Works</p>
+          <h2 id="works-title" class="reveal">Predict. Intervene. Recover.</h2>
+          <div class="grid" data-stagger-group>
+            <article class="card step-card reveal">
+              <span class="step-card__number">01</span>
+              <h3>Monitor</h3>
+              <p>
+                Tracks 5 financial signals silently in the background — BNPL frequency, balance trends, repayment punctuality, debt-to-income ratio, spending velocity
+              </p>
+            </article>
+
+            <article class="card step-card reveal">
+              <span class="step-card__number">02</span>
+              <h3>Predict</h3>
+              <p>
+                The Financial Stress Score forecasts your 3-month cash flow before you run out — not after
+              </p>
+            </article>
+
+            <article class="card step-card reveal">
+              <span class="step-card__number">03</span>
+              <h3>Intervene</h3>
+              <p>
+                When you reach checkout, MyDuitAI steps in with the full picture. The default is Pause — not Proceed
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section quote-section" id="impact" aria-labelledby="impact-title">
+        <div class="section__inner">
+          <p class="eyebrow reveal" id="impact-title">Impact</p>
+          <blockquote class="quote reveal">
+            "Financial stress doesn't just drain your bank account. It keeps you up at 3am. It makes you cancel plans. It quietly dismantles everything we mean when we say wellbeing."
+          </blockquote>
+          <p class="reveal">— MyDuitAI, built for the 53,000</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer__inner">
+        <div class="footer__links">
+          <a href="#how-it-works">How It Works</a>
+          <a href="#impact">Impact</a>
+          <a href="mailto:hello@myduit.ai">Contact</a>
+        </div>
+        <div class="copyright">© 2026 MyDuitAI · ICU Team</div>
+      </div>
+    </footer>
+
+    <script>
+      (() => {
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const typewriter = document.querySelector("[data-typewriter]");
+        const title = typewriter?.dataset.typewriter || "";
+        const hero = document.querySelector(".hero");
+        const parallaxTarget = document.querySelector("[data-parallax]");
+
+        const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+        function formatValue(value, format) {
+          if (format === "percent") return `${Math.round(value)}%`;
+          if (format === "currency") return `RM${value.toFixed(1)}B`;
+          return Math.round(value).toLocaleString("en-MY");
+        }
+
+        function animateCount(element) {
+          if (element.dataset.counted === "true") return;
+          element.dataset.counted = "true";
+
+          const target = Number(element.dataset.countTo);
+          const format = element.dataset.format;
+
+          if (reduceMotion) {
+            element.textContent = formatValue(target, format);
+            return;
+          }
+
+          const duration = 1500;
+          const startTime = performance.now();
+
+          function frame(now) {
+            const progress = Math.min((now - startTime) / duration, 1);
+            const eased = easeOutCubic(progress);
+            element.textContent = formatValue(target * eased, format);
+
+            if (progress < 1) requestAnimationFrame(frame);
+          }
+
+          requestAnimationFrame(frame);
+        }
+
+        function setStaggers() {
+          document.querySelectorAll("[data-stagger-group]").forEach((group) => {
+            group.querySelectorAll(".reveal").forEach((item, index) => {
+              item.style.setProperty("--stagger", `${index * 120}ms`);
+            });
+          });
+        }
+
+        function revealOnScroll() {
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+
+                entry.target.classList.add("is-visible");
+                entry.target.querySelectorAll("[data-count-to]").forEach(animateCount);
+                if (entry.target.matches("[data-count-to]")) animateCount(entry.target);
+                observer.unobserve(entry.target);
+              });
+            },
+            { threshold: 0.22, rootMargin: "0px 0px -8% 0px" }
+          );
+
+          document.querySelectorAll(".reveal, .stat-card").forEach((item) => observer.observe(item));
+        }
+
+        function runTypewriter() {
+          if (!typewriter) return;
+
+          if (reduceMotion) {
+            typewriter.textContent = title;
+            return;
+          }
+
+          let index = 0;
+          setTimeout(() => {
+            const interval = setInterval(() => {
+              typewriter.textContent = title.slice(0, index + 1);
+              index += 1;
+
+              if (index >= title.length) clearInterval(interval);
+            }, 55);
+          }, 1000);
+        }
+
+        function bindHeroParallax() {
+          if (!hero || !parallaxTarget || reduceMotion) return;
+
+          hero.addEventListener("mousemove", (event) => {
+            const rect = hero.getBoundingClientRect();
+            const x = (event.clientX - rect.left) / rect.width;
+            const y = (event.clientY - rect.top) / rect.height;
+            const px = (x - 0.5) * 18;
+            const py = (y - 0.5) * 14;
+
+            hero.style.setProperty("--mx", `${x * 100}%`);
+            hero.style.setProperty("--my", `${y * 100}%`);
+            parallaxTarget.style.setProperty("--px", `${px}px`);
+            parallaxTarget.style.setProperty("--py", `${py}px`);
+          });
+
+          hero.addEventListener("mouseleave", () => {
+            hero.style.setProperty("--mx", "50%");
+            hero.style.setProperty("--my", "32%");
+            parallaxTarget.style.setProperty("--px", "0px");
+            parallaxTarget.style.setProperty("--py", "0px");
+          });
+        }
+
+        setStaggers();
+        runTypewriter();
+        revealOnScroll();
+        bindHeroParallax();
+      })();
+    </script>
   </body>
 </html>

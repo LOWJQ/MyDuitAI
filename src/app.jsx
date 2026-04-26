@@ -21,6 +21,16 @@ const demoSteps = [
   { label: "Decision Moment", screen: "checkout" },
   { label: "Recovery Plan", screen: "recovery" },
 ];
+const validScreens = new Set(["overview", "signals", "forecast", "checkout", "recovery"]);
+
+const getScreenFromHash = () => {
+  if (typeof window === "undefined") {
+    return "overview";
+  }
+
+  const hashScreen = window.location.hash.replace("#", "").trim().toLowerCase();
+  return validScreens.has(hashScreen) ? hashScreen : "overview";
+};
 
 function SidebarIcon({ icon, active = false }) {
   const stroke = active ? "#1652F0" : "#111827";
@@ -78,21 +88,37 @@ function SidebarIcon({ icon, active = false }) {
 }
 
 function App() {
-  const [screen, setScreen] = useState("overview");
+  const [screen, setScreen] = useState(getScreenFromHash);
   const { data, scoreResult, formatCurrency } = getUserFinancialContext();
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+
+    if (window.location.hash !== `#${screen}`) {
+      window.history.replaceState(null, "", `#${screen}`);
+    }
   }, [screen]);
 
+  useEffect(() => {
+    const handleHashChange = () => {
+      setScreen(getScreenFromHash());
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, []);
+
   const scoreTone =
-    scoreResult.score >= 80
+    scoreResult.score >= 60
       ? {
           card: "border-[#D7E8D8] bg-[#F7FCF9]",
           score: "text-[#0F9D73]",
           zone: "text-[#0F9D73]",
         }
-      : scoreResult.score >= 60
+      : scoreResult.score >= 40
         ? {
             card: "border-[#F7D7A7] bg-[#FFFBF4]",
             score: "text-[#B7791F]",
@@ -195,7 +221,7 @@ function App() {
                 {data.userProfile.employmentStatus}
               </p>
               <p className="mt-2.5 text-[12px] leading-relaxed text-[#6B7280]">
-                Critical scores can trigger AKPK referral and counselling support.
+                Intervention scores can trigger AKPK referral and counselling support.
               </p>
             </div> */}
           </div>

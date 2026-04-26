@@ -5,14 +5,14 @@ function CheckoutInterventionPanel({
   peerRatio,
   formatCurrency,
 }) {
-  const isCritical =
-    scoreResult.zone === "Critical" || checkoutImpact.projectedZone === "Critical";
+  const isIntervention =
+    scoreResult.zone === "Intervention" || checkoutImpact.projectedZone === "Intervention";
   const ratioGap = Math.max(0, checkoutImpact.projectedBnplDebtToIncomeRatio - peerRatio);
 
   return (
     <div
       className={`rounded-[28px] border p-6 ${
-        isCritical ? "border-[#F7C7C7] bg-[#FFF8F8]" : "border-[#E6E8EC] bg-white"
+        isIntervention ? "border-[#F7C7C7] bg-[#FFF8F8]" : "border-[#E6E8EC] bg-white"
       }`}
     >
       <div className="flex items-start gap-4">
@@ -20,13 +20,13 @@ function CheckoutInterventionPanel({
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path
               d="M12 2L2 20h20L12 2z"
-              stroke={isCritical ? "#EF4444" : "#F59E0B"}
+              stroke={isIntervention ? "#EF4444" : "#F59E0B"}
               strokeWidth="2"
               strokeLinejoin="round"
             />
             <path
               d="M12 9v5M12 16.5v.5"
-              stroke={isCritical ? "#EF4444" : "#F59E0B"}
+              stroke={isIntervention ? "#EF4444" : "#F59E0B"}
               strokeWidth="2"
               strokeLinecap="round"
             />
@@ -37,7 +37,7 @@ function CheckoutInterventionPanel({
             Intervention layer
           </p>
           <h2 className="mt-1 text-[16px] font-semibold text-[#111827]">
-            {isCritical ? "Your financial position is at high risk" : "Before you proceed"}
+            {isIntervention ? "Your financial position needs intervention" : "Before you proceed"}
           </h2>
           <p className="mt-3 text-[14px] leading-relaxed text-[#5F6673]">
             {checkoutImpact.paymentType === "bnpl"
@@ -110,7 +110,7 @@ function CheckoutInterventionPanel({
             If you proceed, you move to {checkoutImpact.projectedScore} in the{" "}
             {checkoutImpact.projectedZone.toLowerCase()} zone.
           </p>
-          {isCritical ? (
+          {isIntervention ? (
             <p className="mt-3 text-[13px] leading-relaxed text-[#C53030]">
               This is the escalation threshold. AKPK support can be triggered at this level to
               connect the user to debt counselling before another installment is added.

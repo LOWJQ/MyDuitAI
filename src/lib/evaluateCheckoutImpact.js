@@ -26,7 +26,7 @@ export function evaluateCheckoutImpact(data, metrics, selectedOptionLabel = null
 
   const currentBnplRatio = normalizeRatio(metrics.bnplDebtToIncomeRatio);
   const projectedBnplDebtToIncomeRatio = clamp(
-    (metrics.monthlyBnplRepayments + bnplIncrease) / Math.max(metrics.monthlyIncome || 1, 1),
+    currentBnplRatio + bnplIncrease / Math.max(metrics.monthlyIncome || 1, 1),
     0,
     1.5,
   );
@@ -74,8 +74,8 @@ export function evaluateCheckoutImpact(data, metrics, selectedOptionLabel = null
   const currentResult = calculateFinancialStressScore(metrics);
   const worseRiskZone = projectedResult.zone !== currentResult.zone;
   const addedBnplBurden = Math.round((projectedBnplDebtToIncomeRatio - currentBnplRatio) * 100);
-  const criticalIntervention =
-    projectedResult.zone === "Critical" ||
+  const interventionTriggered =
+    projectedResult.zone === "Intervention" ||
     (selectedPaymentOption.type === "bnpl" && projectedBnplDebtToIncomeRatio >= 0.3);
 
   return {
@@ -91,7 +91,7 @@ export function evaluateCheckoutImpact(data, metrics, selectedOptionLabel = null
     projectedZone: projectedResult.zone,
     addedBnplBurden,
     worseRiskZone,
-    criticalIntervention,
+    interventionTriggered,
     riskMessage:
       selectedPaymentOption.type === "bnpl"
         ? `Selecting ${selectedPaymentOption.label} would push Buy Now Pay Later commitments to ${Math.round(

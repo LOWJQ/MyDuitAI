@@ -26,7 +26,7 @@ function CustomScoreTooltip({ active, payload, label }) {
 
   const point = payload[0]?.payload;
   const score = point?.score ?? 0;
-  const scoreColor = score < 60 ? "#C53030" : score < 80 ? "#B7791F" : "#0F9D73";
+  const scoreColor = score < 40 ? "#C53030" : score < 60 ? "#B7791F" : "#0F9D73";
 
   return (
     <div className="rounded-[18px] bg-white px-4 py-3 shadow-[0_18px_40px_rgba(17,24,39,0.12)]">
@@ -49,17 +49,10 @@ function Overview({ setScreen }) {
     "Calculating Financial Stress Score...",
     "Analysis complete.",
   ];
-  const scoreTrendData = [
-    { label: "Early Mar", score: 79, zone: "Warning" },
-    { label: "Mid Mar", score: 72, zone: "Warning" },
-    { label: "Late Mar", score: 64, zone: "Warning" },
-    { label: "Early Apr", score: 61, zone: "Warning" },
-    { label: "Mid Apr", score: 57, zone: "Danger" },
-    { label: "This week", score: 52, zone: "Danger" },
-    { label: "Today", score: 48, zone: "Danger" },
-  ];
-
-  const { data, metrics, scoreResult, peerComparison, formatCurrency } = getUserFinancialContext();
+  const { data, metrics, scoreResult, peerComparison, scoreTrendData, formatCurrency } = getUserFinancialContext();
+  const totalScoreDrop = Math.max(0, scoreTrendData[0]?.score - scoreResult.score);
+  const midAprilScore = scoreTrendData.find((point) => point.label === "Mid Apr")?.score ?? scoreResult.score;
+  const threeWeekScoreDrop = Math.max(0, midAprilScore - scoreResult.score);
   const explanations = generateRiskExplanation(metrics).slice(0, 3);
   const explanationDrivers = explanations.map((message, index) => ({
     signal: `explanation-${index}`,
@@ -179,7 +172,7 @@ function Overview({ setScreen }) {
   const isTyping = showAlert && displayedText.length < aiAlertMessage.length;
 
   return (
-    <div className="min-h-[calc(100vh-84px)] bg-[#FCFCFD] px-8 py-7 pb-24">
+    <div className="min-h-[calc(100vh-84px)] bg-[#FCFCFD] px-8 py-7 pb-32">
       {showAnalysisOverlay ? (
         <div className="flex min-h-[60vh] items-center justify-center px-8">
           <AnalysisOverlay
@@ -253,7 +246,7 @@ function Overview({ setScreen }) {
 
                 <div className="mt-6 flex items-center text-[14px] text-[#6B7280]">
                   <span>
-                    Score drop <span className="font-semibold text-[#991B1B]">-18 pts</span>
+                    Score drop <span className="font-semibold text-[#991B1B]">-{threeWeekScoreDrop} pts</span>
                   </span>
                   <span className="mx-4 text-[#E5E7EB]">|</span>
                   <span>
@@ -362,7 +355,7 @@ function Overview({ setScreen }) {
                 Financial Stress Score - last 7 weeks
               </h3>
               <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
-                The score has dropped 31 points since early March.
+                The score has dropped {totalScoreDrop} points since early March.
               </p>
             </div>
 
@@ -400,7 +393,7 @@ function Overview({ setScreen }) {
                     stroke="#C53030"
                     strokeDasharray="6 6"
                     ifOverflow="extendDomain"
-                    label={{ value: "Critical", position: "insideTopRight", fill: "#C53030", fontSize: 12 }}
+                    label={{ value: "Intervention", position: "insideTopRight", fill: "#C53030", fontSize: 12 }}
                   />
                   <Tooltip content={<CustomScoreTooltip />} cursor={{ stroke: "#F3F4F6", strokeWidth: 1.5 }} />
                   <Area
@@ -490,7 +483,7 @@ function Overview({ setScreen }) {
         label="Hear MyDuitAI explain why your score is dropping right now."
         buttonText="See What We See →"
         question="Why is my score dropping?"
-        fallback="Aisha, your score dropped 18 points in three weeks because your BNPL commitments grew faster than your income. You now have four active plans taking up 28 percent of your salary. Your end of month balance is down to RM24. The pattern is accelerating, and MyDuitAI caught it before it became a crisis."
+        fallback={`Aisha, your score dropped ${threeWeekScoreDrop} points in three weeks because your BNPL commitments grew faster than your income. You now have four active plans taking up ${metrics.bnplRatioPercent} percent of your salary, while your peers average ${peerComparison.peerRatio} percent. Your end of month balance is down to ${formatCurrency(metrics.latestEndingBalance)}. The pattern is accelerating, and MyDuitAI caught it before it became a crisis.`}
       />
     </div>
   );

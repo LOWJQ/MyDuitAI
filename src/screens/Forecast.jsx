@@ -173,7 +173,7 @@ function Forecast({ setScreen }) {
     "Projecting income vs obligations...",
     "Modelling BNPL compounding effect...",
     "Simulating 3-month trajectory...",
-    "Identifying critical threshold...",
+    "Identifying intervention threshold...",
     "Forecast ready.",
   ];
   const [hasAnalysed, setHasAnalysed] = useState(analysisState.completed);
@@ -189,7 +189,6 @@ function Forecast({ setScreen }) {
     { month: "Jul", current: forecast.currentBehavior[2]?.projectedRemainingCash ?? metrics.latestEndingBalance, safer: forecast.saferBehavior[2]?.projectedRemainingCash ?? metrics.latestEndingBalance },
   ];
   const lastForecastPoint = forecastChartData[forecastChartData.length - 1];
-  const pointsToCritical = Math.max(0, scoreResult.score - 40);
   const getNarrativeBorderColor = (line) => {
     const normalizedLine = line.toLowerCase();
 
@@ -205,7 +204,7 @@ function Forecast({ setScreen }) {
   };
 
   return (
-    <div className="min-h-[calc(100vh-84px)] bg-[#FCFCFD] px-8 py-7 pb-24">
+    <div className="min-h-[calc(100vh-84px)] bg-[#FCFCFD] px-8 py-7 pb-32">
       {!hasAnalysed && hasStartedAnalysis ? (
         <div className="flex min-h-[60vh] items-center justify-center px-8">
           <AnalysisOverlay
@@ -461,7 +460,7 @@ function Forecast({ setScreen }) {
       ) : null}
       <NextStepBar
         show={hasAnalysed && contentVisible}
-        label="Your financial trajectory is critical. The AI has triggered an intervention."
+        label="Your financial trajectory is near the intervention threshold. The AI has prepared a protective next step."
         buttonText="See the Intervention →"
         question="Why does my forecast look like this?"
         fallback="Aisha, three payments - Atome RM220, Grab PayLater RM180, and Shopee PayLater RM260 - all land between May 5th and 11th. Your salary only arrives on the 25th. That 20-day gap is what collapses your cash in May. If nothing changes, June looks worse."

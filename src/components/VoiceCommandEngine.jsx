@@ -1,6 +1,25 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { mockUserData } from "../data/mockUserData";
 
+const DEBT_SUMMARY_SCRIPT =
+  "Aisha, you owe one thousand eight hundred fifty eight ringgit Malaysia. Eight hundred twenty six ringgit Malaysia is due this month.";
+const BROWSER_VOICE_HINTS = [
+  "natural",
+  "neural",
+  "online",
+  "aria",
+  "jenny",
+  "sara",
+  "samantha",
+  "libby",
+  "zira",
+  "google",
+  "microsoft",
+];
+
+let humanVoiceAudio = null;
+let humanVoiceUrl = "";
+
 // ─── Deep links for each BNPL provider ───────────────────────────────────────
 const BNPL_DEEP_LINKS = {
   "Shopee PayLater": "https://shopee.com.my/payment/spaylater",
@@ -66,7 +85,7 @@ const INTENTS = [
   },
   {
     id: "summary_debt",
-    patterns: [/how much.*owe|total.*debt|debt.*total|owe.*total|what.*owe/i],
+    patterns: [/^check\s+my\b|check.*debt|debt.*check|how much.*owe|total.*debt|debt.*total|owe.*total|what.*owe/i],
     action: "summary_debt",
   },
   {
@@ -109,12 +128,12 @@ function buildResponse(intent, setScreen, speak) {
   if (intent.action === "pay") {
     const plan = plans.find((p) => p.provider === intent.provider);
     if (!plan) {
-      speak(`I couldn't find an active ${intent.provider} plan.`);
+      speak(`No active ${intent.provider} debt found.`);
       return null;
     }
     const url = BNPL_DEEP_LINKS[plan.provider];
     speak(
-      `Opening ${plan.provider}. Your next payment is RM${plan.installmentAmount}, due ${formatDate(plan.nextDueDate)}.`
+      `Opening ${plan.provider}. RM${plan.installmentAmount} is due ${formatDate(plan.nextDueDate)}.`
     );
     return { type: "deeplink", url, plan };
   }
@@ -122,7 +141,7 @@ function buildResponse(intent, setScreen, speak) {
   if (intent.action === "pay_all") {
     const total = plans.reduce((s, p) => s + p.installmentAmount, 0);
     speak(
-      `You have ${plans.length} active plans totalling RM${total} this month. I'll show you each payment link now.`
+      `${plans.length} active plans. RM${total} is due this month.`
     );
     return { type: "pay_all", plans };
   }
@@ -135,18 +154,14 @@ function buildResponse(intent, setScreen, speak) {
       checkout: "Checkout",
       recovery: "Recovery",
     };
-    speak(`Going to ${labels[intent.screen]}.`);
+    speak(`Opening ${labels[intent.screen]}.`);
     setScreen(intent.screen);
     return { type: "navigate" };
   }
 
   if (intent.action === "summary_debt") {
-    const total = plans.reduce((s, p) => s + p.installmentAmount * p.installmentsRemaining, 0);
-    const monthly = plans.reduce((s, p) => s + p.installmentAmount, 0);
-    speak(
-      `Your total outstanding BNPL debt is RM${total}. This month alone, you owe RM${monthly} across ${plans.length} plans.`
-    );
-    return { type: "spoken" };
+    speak(DEBT_SUMMARY_SCRIPT);
+    return { type: "spoken", message: DEBT_SUMMARY_SCRIPT };
   }
 
   if (intent.action === "summary_next") {
@@ -155,13 +170,13 @@ function buildResponse(intent, setScreen, speak) {
     );
     const next = sorted[0];
     speak(
-      `Your next payment is RM${next.installmentAmount} to ${next.provider}, due ${formatDate(next.nextDueDate)}.`
+      `Next is ${next.provider}, RM${next.installmentAmount}, due ${formatDate(next.nextDueDate)}.`
     );
     return { type: "spoken" };
   }
 
   if (intent.action === "generate_plan") {
-    speak("Taking you to Recovery to generate your plan.");
+    speak("Opening Recovery.");
     setScreen("recovery");
     return { type: "navigate" };
   }
@@ -174,20 +189,87 @@ function formatDate(dateStr) {
   return d.toLocaleDateString("en-MY", { day: "numeric", month: "long" });
 }
 
-function speak(text) {
-  if (!("speechSynthesis" in window)) return;
+function stopHumanVoice() {
+  if (humanVoiceAudio) {
+    humanVoiceAudio.pause();
+    humanVoiceAudio.currentTime = 0;
+  }
+
+  if (humanVoiceUrl) {
+    URL.revokeObjectURL(humanVoiceUrl);
+    humanVoiceUrl = "";
+  }
+}
+
+function speakWithBrowserVoice(text) {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+    return;
+  }
+
   window.speechSynthesis.cancel();
-  const utt = new SpeechSynthesisUtterance(text);
-  utt.rate = 1.05;
-  utt.pitch = 0.97;
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 1.05;
+  utterance.pitch = 1.02;
+  utterance.volume = 1;
+
   const voices = window.speechSynthesis.getVoices();
-  const preferred = voices.find(
-    (v) =>
-      v.lang.startsWith("en") &&
-      /aria|jenny|zira|samantha|female|libby|natural|neural/i.test(v.name)
-  );
-  if (preferred) utt.voice = preferred;
-  window.speechSynthesis.speak(utt);
+  const englishVoices = voices.filter((voice) => voice.lang?.toLowerCase().startsWith("en"));
+  const preferredVoice = englishVoices
+    .map((voice) => {
+      const name = `${voice.name} ${voice.lang}`.toLowerCase();
+      const score = BROWSER_VOICE_HINTS.reduce(
+        (total, hint) => total + (name.includes(hint) ? 1 : 0),
+        0,
+      );
+
+      return { voice, score };
+    })
+    .sort((left, right) => right.score - left.score)[0]?.voice;
+
+  if (preferredVoice) {
+    utterance.voice = preferredVoice;
+    utterance.lang = preferredVoice.lang;
+  }
+
+  window.speechSynthesis.speak(utterance);
+}
+
+async function speak(text) {
+  if (typeof window === "undefined" || typeof Audio === "undefined") {
+    speakWithBrowserVoice(text);
+    return;
+  }
+
+  stopHumanVoice();
+
+  try {
+    const response = await fetch("/api/voice", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ input: text }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Human voice request failed (${response.status})`);
+    }
+
+    const audioBlob = await response.blob();
+
+    if (!audioBlob.size) {
+      throw new Error("Human voice response was empty");
+    }
+
+    humanVoiceUrl = URL.createObjectURL(audioBlob);
+    humanVoiceAudio = new Audio(humanVoiceUrl);
+    humanVoiceAudio.onended = stopHumanVoice;
+    humanVoiceAudio.onerror = stopHumanVoice;
+    await humanVoiceAudio.play();
+  } catch (error) {
+    console.warn("Human voice playback failed:", error);
+    speakWithBrowserVoice(text);
+  }
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -223,8 +305,8 @@ function VoiceCommandEngine({ setScreen }) {
 
       if (!intent) {
         setState("error");
-        setResult({ message: "I didn't understand that. Try: \"Pay my Shopee debt\" or \"Go to Recovery\"." });
-        speak("Sorry, I didn't catch that. Try saying: pay my Shopee debt, or go to recovery.");
+        setResult({ message: "I didn't understand that. Try: \"Check my debt\" or \"Go to Recovery\"." });
+        speak("Try saying check my debt, or go to recovery.");
         resetEngine();
         return;
       }
@@ -259,7 +341,7 @@ function VoiceCommandEngine({ setScreen }) {
         setResult({ type: "pay_all", message: "Here are all your payment links:" });
       } else {
         setState("result");
-        setResult({ type: "spoken", message: "Done." });
+        setResult({ type: "spoken", message: actionResult.message || "Done." });
       }
 
       resetEngine();
@@ -341,7 +423,7 @@ function VoiceCommandEngine({ setScreen }) {
   useEffect(() => {
     return () => {
       stopListening();
-      window.speechSynthesis?.cancel();
+      stopHumanVoice();
     };
   }, [stopListening]);
 
@@ -412,7 +494,7 @@ function VoiceCommandEngine({ setScreen }) {
               ? transcript || "Speak now"
               : isProcessing
               ? transcript
-              : 'Say "Pay my Shopee debt"'}
+              : 'Say "Check my debt"'}
           </p>
         </div>
 
@@ -481,7 +563,7 @@ function VoiceCommandEngine({ setScreen }) {
         <div className="border-t border-[#F3F4F6] px-4 py-2.5">
           <div className="flex flex-wrap gap-1.5">
             {[
-              "Pay Shopee",
+              "Check my debt",
               "Pay all debts",
               "Next payment",
               "Go to Recovery",

@@ -142,7 +142,7 @@ function Signals({ setScreen }) {
   ];
 
   return (
-    <div className="min-h-[calc(100vh-84px)] bg-[#FCFCFD] px-8 py-7 pb-24">
+    <div className="min-h-[calc(100vh-84px)] bg-[#FCFCFD] px-8 py-7 pb-32">
       {hasAnalysed ? (
         <div
           className={`mx-auto max-w-[1180px] space-y-6 transition-opacity duration-[400ms] ${contentVisible ? "opacity-100" : "opacity-0"
@@ -245,7 +245,7 @@ function Signals({ setScreen }) {
 
             <div className="mt-4 rounded-[16px] border border-[#F7C7C7] bg-[#FFF8F8] px-4 py-3">
               <p className="text-[13px] font-semibold text-[#C53030]">
-                April repayments alone consume 28% of Aisha&apos;s monthly income - before rent, food,
+                April repayments alone consume 38% of Aisha&apos;s monthly income - before rent, food,
                 or transport.
               </p>
             </div>
@@ -676,7 +676,7 @@ function Signals({ setScreen }) {
         label="4 risk signals identified across your transaction history. See where this leads."
         buttonText="See Where This Leads →"
         question="What are the four risk signals MyDuitAI sees on this page?"
-        fallback="Aisha, MyDuitAI sees four pressure points building together. Your BNPL repayments are clustering early in the month, your month-end cash has shrunk to RM24, your BNPL burden is already 28 percent of income, and recent spending is landing before your May 25 salary. That combination is why your score keeps weakening."
+        fallback="Aisha, MyDuitAI sees four pressure points building together. Your BNPL repayments are clustering early in the month, your month-end cash has shrunk to RM24, your BNPL burden is already 38 percent of income while peers average 22 percent, and recent spending is landing before your May 25 salary. That combination is why your score keeps weakening."
       />
     </div>
   );

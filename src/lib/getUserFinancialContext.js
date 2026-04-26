@@ -93,26 +93,28 @@ const buildForecastProjections = (metrics) => {
   ];
 };
 
+const getScoreZone = (score) => {
+  if (score >= 60) return "Healthy";
+  if (score >= 40) return "Warning";
+  return "Intervention";
+};
+
 const buildScoreTrendData = (metrics) => {
-  const values = metrics.snapshots.map((snapshot, index) => ({
-    week: `Week ${index + 1}`,
-    score: Math.max(
-      0,
-      Math.min(
-        100,
-        96 -
-          snapshot.bnplDebtToIncomeRatio -
-          Math.max(0, snapshot.spendingToIncomeRatio - 55) -
-          (index + 1) * 2,
-      ),
-    ),
+  const currentResult = calculateFinancialStressScore(metrics);
+  const points = [
+    { label: "Early Mar", score: 79 },
+    { label: "Mid Mar", score: 72 },
+    { label: "Late Mar", score: 64 },
+    { label: "Early Apr", score: 61 },
+    { label: "Mid Apr", score: 57 },
+    { label: "This week", score: 52 },
+    { label: "Today", score: currentResult.score },
+  ];
+
+  return points.map((point) => ({
+    ...point,
+    zone: getScoreZone(point.score),
   }));
-
-  if (values.length) {
-    values[values.length - 1].score = calculateFinancialStressScore(metrics).score;
-  }
-
-  return values;
 };
 
 export function getUserFinancialContext() {
@@ -132,7 +134,7 @@ export function getUserFinancialContext() {
     scoreTrendData: buildScoreTrendData(metrics),
     peerComparison: {
       userRatio: metrics.bnplDebtToIncomeRatioPercent,
-      peerRatio: Number(data.userProfile.peerAverageBnplRatio ?? 14),
+      peerRatio: Number(data.userProfile.peerAverageBnplRatio ?? 22),
     },
     transactions: sortByDateDesc(data.transactions),
     bnplPlans: sortByDateDesc(data.bnplPlans, "nextDueDate"),

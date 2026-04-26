@@ -2,19 +2,26 @@
   const BRAND_BLUE = "#1652F0";
   const OVERLAY_Z_INDEX = "2147483647";
   const TOAST_Z_INDEX = "2147483647";
-  const FORECAST_URL = "http://localhost:5173";
+  const DASHBOARD_URL = "http://localhost:5173/dashboard.html#forecast";
   const STORAGE_KEY = "financialState";
-  const TRIGGER_TEXT_REGEX = /spaylater/i;
+  const STATE_VERSION = "airpods-rm505-score-38";
+  const TRIGGER_TEXT_REGEX = /spaylater|shopee paylater|credit\s*(?:\/|or|and|&)?\s*debit\s*card|debit\s*(?:\/|or|and|&)?\s*credit\s*card|credit card|kad kredit/i;
+  const BLOCKABLE_PAYMENT_REGEX = /spaylater|shopee paylater|credit\s*(?:\/|or|and|&)?\s*debit\s*card|debit\s*(?:\/|or|and|&)?\s*credit\s*card|credit card|kad kredit/i;
 
   const defaultState = {
+    stateVersion: STATE_VERSION,
     userName: "Aisha",
-    score: 49,
-    zone: "Danger",
-    bnplRatio: 28,
-    peerAvgRatio: 14,
+    score: 38,
+    zone: "Intervention",
+    bnplRatio: 38,
+    peerAvgRatio: 22,
     monthlyBnplBurden: 826,
-    projectedDecemberCash: -142,
-    projectedScore: 42,
+    purchaseName: "AirPods",
+    purchaseAmount: 505,
+    purchaseInstallment: 168,
+    projectedMayCash: -144,
+    projectedDecemberCash: -144,
+    projectedScore: 38,
     activePlans: 4,
     monthlyIncome: 3000,
   };
@@ -30,6 +37,8 @@
   let currentBlockedUntil = null;
 
   function loadFinancialState() {
+    financialState = { ...defaultState };
+
     if (!chrome?.storage?.local) {
       return;
     }
@@ -39,9 +48,7 @@
         return;
       }
 
-      if (result[STORAGE_KEY]) {
-        financialState = { ...defaultState, ...result[STORAGE_KEY] };
-      }
+      chrome.storage.local.set({ [STORAGE_KEY]: { ...defaultState } });
 
       if (result.bnplBlockedUntil && Date.now() < result.bnplBlockedUntil) {
         currentBlockedUntil = result.bnplBlockedUntil;
@@ -52,11 +59,11 @@
 
   function enforceBlock() {
     if (currentBlockedUntil && Date.now() < currentBlockedUntil) {
-      hideSPayLaterOption(currentBlockedUntil);
+      hideBlockedPaymentOptions(currentBlockedUntil);
     }
   }
 
-  function hideSPayLaterOption(blockedUntilTimestamp) {
+  function hideBlockedPaymentOptions(blockedUntilTimestamp) {
     if (!document.body) return;
     const walker = document.createTreeWalker(
       document.body,
@@ -68,7 +75,7 @@
     const targets = [];
     let node;
     while ((node = walker.nextNode())) {
-      if (/spaylater|shopee paylater/i.test(node.nodeValue)) {
+      if (BLOCKABLE_PAYMENT_REGEX.test(node.nodeValue)) {
         targets.push(node.parentElement);
       }
     }
@@ -97,7 +104,7 @@
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
           </svg>
-          <span>Blocked by MyDuitAI until ${dateStr}</span>
+          <span>BNPL and credit blocked by MyDuitAI until ${dateStr}</span>
         </div>
       `;
     });
@@ -160,7 +167,7 @@
       return;
     }
 
-    if (!pageContainsSpayLater()) {
+    if (!pageContainsRiskyPaymentOption()) {
       return;
     }
 
@@ -171,7 +178,7 @@
     return window.location.href.toLowerCase().includes("checkout");
   }
 
-  function pageContainsSpayLater() {
+  function pageContainsRiskyPaymentOption() {
     return documentContainsMatch(document.documentElement || document.body, TRIGGER_TEXT_REGEX);
   }
 
@@ -672,7 +679,7 @@
           <div class="myduitai-main">
             <div class="myduitai-badge">MyDuitAI Intervention</div>
             <h1 class="myduitai-title" id="myduitai-title">Wait before you proceed</h1>
-            <p class="myduitai-subtitle">This checkout pattern looks risky based on your current Buy Now Pay Later load and projected cash flow.</p>
+            <p class="myduitai-subtitle">This RM${escapeHtml(String(financialState.purchaseAmount))} ${escapeHtml(financialState.purchaseName)} checkout looks risky based on your current Buy Now Pay Later load, credit exposure, and projected cash flow.</p>
 
             <div class="myduitai-hero">
               <div>
@@ -688,17 +695,17 @@
             <div class="myduitai-grid">
               <div class="myduitai-metric">
                 <p class="myduitai-metric-label">May cash after this</p>
-                <p class="myduitai-metric-value">RM ${escapeHtml(String(financialState.projectedDecemberCash))}</p>
+                <p class="myduitai-metric-value">RM ${escapeHtml(String(financialState.projectedMayCash))}</p>
               </div>
               <div class="myduitai-metric">
-                <p class="myduitai-metric-label">Score after purchase</p>
-                <p class="myduitai-metric-value">${escapeHtml(String(financialState.projectedScore))}</p>
-                <p class="myduitai-metric-note">was ${escapeHtml(String(financialState.score))}</p>
+                <p class="myduitai-metric-label">AirPods purchase</p>
+                <p class="myduitai-metric-value">RM ${escapeHtml(String(financialState.purchaseAmount))}</p>
+                <p class="myduitai-metric-note">~RM${escapeHtml(String(financialState.purchaseInstallment))}/month if split</p>
               </div>
             </div>
 
             <div class="myduitai-callout" style="background:#FFF7D6;border-color:#FDE68A;color:#7C5600;">
-              ${escapeHtml(financialState.userName)}, your Buy Now Pay Later burden is already ${escapeHtml(String(financialState.bnplRatio))}% of your income - peers your age average ${escapeHtml(String(financialState.peerAvgRatio))}%. This purchase leaves you RM${escapeHtml(String(financialState.projectedDecemberCash))} in May.
+              ${escapeHtml(financialState.userName)}, your Buy Now Pay Later burden is already ${escapeHtml(String(financialState.bnplRatio))}% of your income - peers your age average ${escapeHtml(String(financialState.peerAvgRatio))}%. Adding this RM${escapeHtml(String(financialState.purchaseAmount))} ${escapeHtml(financialState.purchaseName)} through BNPL or credit leaves you around RM${escapeHtml(String(financialState.projectedMayCash))} in May.
             </div>
 
             <div class="myduitai-peer-box">
@@ -719,24 +726,24 @@
               </div>
             </div>
 
-            <button class="myduitai-button myduitai-button-primary" id="myduitai-pause-button" type="button"> Block BNPL for 48 hours</button>
+            <button class="myduitai-button myduitai-button-primary" id="myduitai-pause-button" type="button"> Block BNPL & credit for 48 hours</button>
             <p class="myduitai-button-caption">Recommended by MyDuitAI · Safer default</p>
             <button class="myduitai-button myduitai-button-secondary" id="myduitai-forecast-button" type="button"> See What Happens Next</button>
             <button class="myduitai-link" id="myduitai-proceed-link" type="button">I understand the risk — proceed anyway</button>
             <p class="myduitai-urgency"> MyDuitAI pauses by default to protect you</p>
-            <p class="myduitai-footer">MyDuitAI protects Malaysian youth from Buy Now Pay Later debt.</p>
+            <p class="myduitai-footer">MyDuitAI protects Malaysian youth from Buy Now Pay Later and credit debt.</p>
           </div>
 
           <div class="myduitai-confirm" id="myduitai-confirm-panel">
             <div class="myduitai-confirm-card">
-              <h2 class="myduitai-confirm-title">Are you sure? This adds RM166/month for 3 months.</h2>
+              <h2 class="myduitai-confirm-title">Are you sure? This adds a RM${escapeHtml(String(financialState.purchaseAmount))} ${escapeHtml(financialState.purchaseName)} purchase to your risk load.</h2>
               <p class="myduitai-confirm-text">A short pause now could reduce financial strain later. You can still continue if you understand the impact.</p>
               <div class="myduitai-confirm-actions">
                 <button class="myduitai-button myduitai-confirm-cancel" id="myduitai-cancel-confirm" type="button">Cancel</button>
                 <button class="myduitai-button myduitai-confirm-proceed" id="myduitai-confirm-proceed" type="button">Confirm</button>
               </div>
             </div>
-            <p class="myduitai-footer">MyDuitAI protects Malaysian youth from Buy Now Pay Later debt.</p>
+            <p class="myduitai-footer">MyDuitAI protects Malaysian youth from Buy Now Pay Later and credit debt.</p>
           </div>
         </div>
       </div>
@@ -752,13 +759,15 @@
       chrome.storage.local.set({ bnplBlockedUntil: blockedUntil }, () => {
         currentBlockedUntil = blockedUntil;
         closeOverlay();
-        showToast("BNPL blocked for 48 hours. Good call.");
+        showToast("BNPL and credit blocked for 48 hours. Good call.");
         enforceBlock();
       });
     });
 
-    shadow.getElementById("myduitai-forecast-button")?.addEventListener("click", () => {
-      window.open(FORECAST_URL, "_blank", "noopener,noreferrer");
+    shadow.getElementById("myduitai-forecast-button")?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      chrome.runtime.sendMessage({ type: "MYDUITAI_OPEN_DASHBOARD", url: DASHBOARD_URL });
     });
 
     shadow.getElementById("myduitai-proceed-link")?.addEventListener("click", () => {

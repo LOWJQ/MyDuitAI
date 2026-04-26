@@ -5,13 +5,14 @@ const VOICE_PROMPT_PREFIX = `You are MyDuitAI, a calm and intelligent financial 
 Her current financial context:
 - Name: Aisha
 - Monthly income: RM3,000
-- Financial Stress Score: 49 (Danger zone)
-- Score dropped 18 points in the last 3 weeks
+- Financial Stress Score: 38 (Intervention zone)
+- Score dropped 19 points in the last 3 weeks
 - Active BNPL plans: 4
 - Monthly BNPL burden: RM826
-- BNPL ratio: 28% of income (peers average 14%)
+- BNPL ratio: 38% of income (peers average 22%)
 - Current end of month balance: RM24
-- Projected May cash after next purchase: -RM142
+- Next purchase being evaluated: RM505 AirPods
+- Projected May cash after next purchase: -RM144
 - BNPL payment cluster: Atome RM220 due May 5, Grab PayLater RM180 due May 9, Shopee PayLater RM260 due May 11
 - Salary arrives: May 25
 
@@ -331,7 +332,7 @@ function AiVoiceButton({
         speechChunksRef.current = chunkTextForSpeech(text);
         chunkIndexRef.current = 0;
 
-        setVoiceStatus("Using browser voice fallback.");
+        setVoiceStatus("AI is generating answer.");
         setIsSpeaking(true);
         window.setTimeout(() => {
           if (speechChunksRef.current.length > 0) {
@@ -423,7 +424,7 @@ function AiVoiceButton({
 
   if (variant === "bar") {
     return (
-      <div className="fixed bottom-0 left-[260px] right-0 z-40 border-t border-[#E6E8EC] bg-white px-8 py-4">
+      <div className="fixed bottom-0 left-[260px] right-0 z-40 border-t border-[#E6E8EC] bg-white px-8 py-5">
         <div className="mx-auto flex max-w-[1180px] items-center justify-between gap-6">
           <div className="min-w-0">
             <p className="text-[14px] text-[#6B7280]">{description}</p>

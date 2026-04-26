@@ -1,26 +1,22 @@
 import ScoreGauge from "./ScoreGauge";
 
 const zoneStyles = {
-  Stable: "text-emerald-600 bg-emerald-50 border-emerald-200",
+  Healthy: "text-emerald-600 bg-emerald-50 border-emerald-200",
   Warning: "text-amber-600 bg-amber-50 border-amber-200",
-  Danger: "text-red-600 bg-red-50 border-red-200",
-  Critical: "text-red-700 bg-red-50 border-red-200",
+  Intervention: "text-red-700 bg-red-50 border-red-200",
 };
 
 function RiskSummaryCard({ score, zone, summary }) {
   const zoneDescriptions = {
-    Stable: "Financially stable with healthy room to absorb new commitments.",
+    Healthy: "Financially healthy, with room to absorb new commitments.",
     Warning: "Early pressure is building and should be addressed before it compounds.",
-    Danger: "Financial strain is becoming visible across multiple behavioural signals.",
-    Critical: "Immediate support is recommended to prevent deeper financial distress.",
+    Intervention: "Protective support is recommended before more debt is added.",
   };
   const zoneNowMessages = {
-    Stable: "Right now, Aisha still has room to recover before risk becomes visible in day-to-day cash flow.",
+    Healthy: "Right now, Aisha has room to absorb commitments without visible day-to-day cash pressure.",
     Warning:
       "Right now, pressure is building quietly in the background even if the user still feels mostly in control.",
-    Danger:
-      "Right now, Aisha is drifting into a zone where everyday spending, repayments, and low month-end cash are starting to overlap.",
-    Critical:
+    Intervention:
       "Right now, the user is close enough to financial distress that protection and support should appear before more debt is added.",
   };
   return (

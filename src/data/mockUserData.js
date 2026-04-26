@@ -8,7 +8,7 @@ export const mockUserData = {
     bankName: "Maybank",
     baselineMonthlyEssentials: 1650,
     baselineMonthlyDiscretionary: 500,
-    peerAverageBnplRatio: 14,
+    peerAverageBnplRatio: 22,
   },
   transactions: [
     {
@@ -293,8 +293,8 @@ export const mockUserData = {
     },
     {
       id: "txn-021",
-      date: "2026-04-03",
-      description: "Atome monthly installment",
+      date: "2026-04-07",
+      description: "Atome monthly installment paid late",
       merchant: "Atome",
       source: "Atome",
       category: "Buy Now Pay Later",
@@ -303,7 +303,7 @@ export const mockUserData = {
       channel: "debit",
       isRecurring: true,
       isBnplRelated: true,
-      tags: ["bnpl", "installment", "shopping"],
+      tags: ["bnpl", "installment", "late-repayment", "shopping"],
     },
     {
       id: "txn-022",
@@ -434,8 +434,8 @@ export const mockUserData = {
       id: "bnpl-004",
       provider: "SPayLater",
       merchant: "Shopee",
-      purchaseName: "Samsung Galaxy Buds Pro",
-      purchaseAmount: 499,
+      purchaseName: "AirPods",
+      purchaseAmount: 505,
       installmentAmount: 166,
       installmentsTotal: 3,
       installmentsRemaining: 3,
@@ -494,10 +494,10 @@ export const mockUserData = {
       id: "rep-006",
       planId: "bnpl-001",
       dueDate: "2026-04-05",
-      paidDate: "2026-04-05",
+      paidDate: "2026-04-07",
       amount: 220,
-      status: "on_time",
-      daysLate: 0,
+      status: "late",
+      daysLate: 2,
     },
   ],
   monthlySnapshots: [
@@ -543,7 +543,7 @@ export const mockUserData = {
       endingBalance: 24,
       totalBnplOutstanding: 1858,
       spendingToIncomeRatio: 0.99,
-      bnplDebtToIncomeRatio: 0.28,
+      bnplDebtToIncomeRatio: 0.38,
     },
   ],
   currentBudgetBreakdown: [
@@ -557,20 +557,20 @@ export const mockUserData = {
   ],
   checkoutScenario: {
     merchant: "Shopee",
-    itemName: "Samsung Galaxy Buds Pro",
-    amount: 499,
+    itemName: "AirPods",
+    amount: 505,
     paymentOptions: [
-      { type: "full_payment", label: "Pay in full", amount: 499 },
+      { type: "full_payment", label: "Pay in full", amount: 505 },
       {
         type: "bnpl",
         label: "Shopee PayLater - 3 months",
-        amount: 166,
+        amount: 168,
         installments: 3,
       },
       {
         type: "bnpl",
         label: "Shopee PayLater - 6 months",
-        amount: 88,
+        amount: 84,
         installments: 6,
       },
     ],

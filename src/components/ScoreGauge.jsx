@@ -34,7 +34,7 @@ function ScoreGauge({ score }) {
   const offset = circumference * (1 - progress);
 
   let scoreColor = "#0052FF";
-  if (score <= 60) scoreColor = "#F59E0B";
+  if (score < 60) scoreColor = "#F59E0B";
   if (score < 40) scoreColor = "#EF4444";
 
   return (

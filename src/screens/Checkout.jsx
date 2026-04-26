@@ -1,9 +1,12 @@
 import NextStepBar from "../components/NextStepBar";
+import { getUserFinancialContext } from "../lib/getUserFinancialContext";
 
 function Checkout({ setScreen }) {
+  const { scoreResult, checkoutImpact, peerComparison, formatCurrency } = getUserFinancialContext();
+  const scoreTone = scoreResult.zone === "Intervention" ? "text-[#C53030]" : "text-[#B7791F]";
   const interventionReasons = [
     {
-      label: "Critical Risk State",
+      label: "Intervention Threshold",
       value: "Intervention Threshold Reached",
       detail: "Your current signals already place you in a state where the next Buy Now Pay Later attempt needs extra friction",
     },
@@ -26,7 +29,7 @@ function Checkout({ setScreen }) {
   ];
 
   return (
-    <div className="min-h-[calc(100vh-84px)] bg-[#FCFCFD] px-8 py-7 pb-24">
+    <div className="min-h-[calc(100vh-84px)] bg-[#FCFCFD] px-8 py-7 pb-32">
       <div className="mx-auto max-w-[1180px] space-y-6 p-8">
         <section className="rounded-[20px] border border-[#F7C7C7] bg-[#FFF8F8] p-6">
           <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[#C53030]">
@@ -75,8 +78,10 @@ function Checkout({ setScreen }) {
             <p className="text-[12px] uppercase tracking-[0.08em] text-[#6B7280]">
               Current Score
             </p>
-            <p className="mt-4 text-[48px] font-semibold leading-none text-[#B7791F]">51</p>
-            <p className="mt-3 text-[14px] font-semibold text-[#B7791F]">Danger</p>
+            <p className={`mt-4 text-[48px] font-semibold leading-none ${scoreTone}`}>
+              {scoreResult.score}
+            </p>
+            <p className={`mt-3 text-[14px] font-semibold ${scoreTone}`}>{scoreResult.zone}</p>
             <p className="mt-3 max-w-[250px] text-[13px] leading-relaxed text-[#6B7280]">
               Your account is still active, but risk is already elevated before the next Buy
               Now Pay Later attempt.
@@ -119,7 +124,7 @@ function Checkout({ setScreen }) {
         label="The AI has prepared a personalised recovery plan for you."
         buttonText="View Recovery Plan →"
         question="Why is MyDuitAI intervening right now?"
-        fallback="Aisha, your BNPL is already at 28 percent of your income, double what your peers carry. Adding another purchase pushes your projected May balance to negative RM142. Your stress score can fall from 49 to 31. MyDuitAI intervenes here because this purchase moment is where the risk becomes real."
+        fallback={`Aisha, your BNPL is already at ${peerComparison.userRatio} percent of your income, while peers average ${peerComparison.peerRatio} percent. Adding the RM${checkoutImpact.purchaseAmount} AirPods purchase pushes your projected May balance to ${formatCurrency(checkoutImpact.projectedEndingBalance)}. Your stress score remains in the ${scoreResult.zone.toLowerCase()} zone at ${scoreResult.score}. MyDuitAI intervenes here because this purchase moment is where the risk becomes real.`}
       />
     </div>
   );
